@@ -1,0 +1,26 @@
+version: '3'
+services:
+  strapi:
+    image: strapi/strapi:3.6.8-node14-alpine
+    environment:
+      DATABASE_CLIENT: postgres
+      DATABASE_NAME: strapi
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: strapi
+      DATABASE_PASSWORD: strapi
+    volumes:
+      - ./backend/app:/srv/app
+    ports:
+      - '1337:1337'
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:14.0-alpine
+    environment:
+      POSTGRES_DB: strapi
+      POSTGRES_USER: strapi
+      POSTGRES_PASSWORD: strapi
+    volumes:
+      - ./backend/data:/var/lib/postgresql/data  
