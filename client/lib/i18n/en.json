@@ -1,0 +1,6 @@
+{  
+    "Connect Wallet": "Connect Wallet",
+    "Disconnect Wallet": "Disconnect Wallet",
+    "Sign Message": "Sign Message",
+    "Message to be signed": "Sign this message to prove you have access to this wallet and we will sign you in.\r\n\r\nThis won't cost you any Ether.\r\n\r\n\r\nTimestamp: {timestamp}"
+}

@@ -1,0 +1,55 @@
+.navbar-team ul li{
+    float: left;
+}
+
+.hr-menu-active {
+    background: linear-gradient(92.82deg, #ff409a 2.03%, #ad49fb 57.42%, #6331d1 99.85%);
+    height: 3px;
+    width: 100%;
+}
+
+.nav-pills {
+    background-color: #FFFFFF;
+    border: 1px solid #D4D4D4;
+    border-radius: 5px;
+    font-size: small;
+}
+
+.nav-pills .nav-link.active, .nav-pills .show>.nav-link {
+    font-weight: bold;
+    color: #000000;
+    background-color: #FFFFFF;
+    border-left: 3px solid #ad49fb;
+    overflow: hidden;
+    border-radius: 0px;
+    /* border-left: 2px solid linear-gradient(92.82deg, #072ee6 0%, #d301f3 52.08%, #fd0164 100%);; */
+}
+
+.hr-menu {
+    background-color: #FFFFFF;
+    height: 0.1px;
+    width: 100%;
+    border-top: 1px solid #FFFFFF;
+}
+
+.hr-side-menu {
+    background-color: #D4D4D4;
+    height: 0.1px;
+    width: 100%;
+    margin: 0px;
+}
+
+/* --------------------------------  user  --------------------------------- */
+.img-profile {
+    width: 100%;
+    /* height: 100%; */
+}
+
+.profile-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    color: #fff;
+    text-align: center;
+    line-height: 50px;
+}

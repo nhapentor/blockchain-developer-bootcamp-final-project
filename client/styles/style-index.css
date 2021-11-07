@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;600;800&display=swap');
+
+body, nav, .font-primary{
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-gradient {
+    background-color: linear-gradient(90deg, rgba(255,64,154,1) 0%, rgba(173,73,251,1) 50%, rgba(99,49,209,1) 100%);
+    color: white;
+}
+
+.bg-black-index {
+    background-image: url('/img/_bgBIndex.png');
+    height: 768px;
+    background-repeat: no-repeat;
+}
+
+.bg-white-index {
+    background-image: url('/img/_bgWIndex.png');
+    height: 861px;
+    background-repeat: no-repeat;
+}
+
+.transformY-65 {
+    transform: translateY(65%);
+}
+
+.easy-step {
+    position: absolute;
+    bottom: 5%;
+    left: 40%;
+}
+
+.text-head {
+  background: -webkit-linear-gradient(90deg, rgba(255,64,154,1) 0%, rgba(173,73,251,1) 50%, rgba(99,49,209,1) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+}
+
+@media screen and (max-width: 765px) and (min-width: 320px) {
+    .bg-white-index { height: 1100px; }
+    .transformY-65 { transform: translateY(0%); }
+}
+
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+    .bg-white-index { height: 950px; }
+    .transformY-65 { transform: translateY(0%); }
+}
