@@ -47,3 +47,234 @@ body, nav, .font-primary{
     .bg-white-index { height: 950px; }
     .transformY-65 { transform: translateY(0%); }
 }
+
+#msform {
+    text-align: center;
+    position: relative;
+    margin-top: 20px
+}
+
+#msform fieldset {
+    background: white;
+    border: 0 none;
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding-bottom: 20px;
+    position: relative
+}
+
+.form-card {
+    text-align: left;
+    padding: 16px;
+}
+
+#msform fieldset:not(:first-of-type) {
+    display: none
+}
+
+#msform input,
+#msform textarea {
+    padding: 8px 15px 8px 15px;
+    border: 1px solid #ccc;
+    border-radius: 0px;
+    margin-bottom: 25px;
+    margin-top: 2px;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: montserrat;
+    color: #2C3E50;
+    background-color: #ECEFF1;
+    font-size: 16px;
+    letter-spacing: 1px
+}
+
+#msform input:focus,
+#msform textarea:focus {
+    -moz-box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    border: 1px solid #ad49fb;
+    outline-width: 0
+}
+
+#msform .action-button {
+    width: 100px;
+    background: linear-gradient(92.82deg, #ff409a 2.03%, #ad49fb 57.42%, #6331d1 99.85%);
+    
+    border-color: linear-gradient(92.82deg, #ff409a 2.03%, #ad49fb 57.42%, #6331d1 99.85%);
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    margin: 10px 0px 10px 5px; 
+    font-family: pop;
+    float: right;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#msform .action-button:hover,
+#msform .action-button:focus {
+    background: linear-gradient(90deg, #ff003d 0%, #cc00ff 100%);
+}
+
+#msform .action-button-previous {
+    width: 100px;
+    color: #ad49fb;
+    border-color: #ad49fb;
+    background-color: #ffffff;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    margin: 10px 5px 10px 0px; 
+    float: right;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#msform .action-button-previous:hover,
+#msform .action-button-previous:focus {
+    background-color: #ad49fb !important;
+    color: #FFFFFF !important;
+}
+
+.card {
+    z-index: 0;
+    border: none;
+    position: relative;
+    border-radius: 8px;
+}
+
+.fs-title {
+    font-size: 25px;
+    color: #ad49fb;
+    margin-bottom: 15px;
+    font-weight: normal;
+    text-align: left
+}
+
+.purple-text {
+    color: #ad49fb;
+    font-weight: normal
+}
+
+.steps {
+    font-size: 25px;
+    color: gray;
+    margin-bottom: 10px;
+    font-weight: normal;
+    text-align: right
+}
+
+.fieldlabels {
+    color: gray;
+    text-align: left
+}
+
+#progressbar {
+    margin-bottom: 30px;
+    overflow: hidden;
+    color: lightgrey
+}
+
+#progressbar .active {
+    color: #ad49fb
+}
+
+#progressbar li {
+    list-style-type: none;
+    font-size: 15px;
+    width: 33.33%;
+    float: left;
+    position: relative;
+    font-weight: 400
+}
+
+#progressbar #account:before {
+    font-family: FontAwesome;
+    content: "\f13e"
+}
+
+#progressbar #personal:before {
+    font-family: FontAwesome;
+    content: "\f007"
+}
+
+#progressbar #payment:before {
+    font-family: FontAwesome;
+    content: "\f030"
+}
+
+#progressbar #confirm:before {
+    font-family: FontAwesome;
+    content: "\f00c"
+}
+
+#progressbar li:before {
+    width: 50px;
+    height: 50px;
+    line-height: 45px;
+    display: block;
+    font-size: 20px;
+    color: #ffffff;
+    background: lightgray;
+    border-radius: 50%;
+    margin: 0 auto 10px auto;
+    padding: 2px
+}
+
+#progressbar li:after {
+    content: '';
+    width: 100%;
+    height: 2px;
+    background: lightgray;
+    position: absolute;
+    left: 0;
+    top: 25px;
+    z-index: -1
+}
+
+#progressbar li.active:before,
+#progressbar li.active:after {
+    background: linear-gradient(90deg, #ff003d 0%, #cc00ff 100%);
+}
+
+.fit-image {
+    width: 100%;
+    object-fit: cover
+}
+
+
+.pie-chart {
+	background:
+		radial-gradient(
+			circle closest-side,
+			white 0,
+			white 52.8%,
+			transparent 52.8%,
+			transparent 60%,
+			white 0
+		),
+		conic-gradient(
+			#ad49fb 0,
+			#ad49fb 50%,
+			#ccc 0,
+			#ccc 100%
+	);
+	position: relative;
+	width: 100%;
+	min-height: 150px;
+	margin: 0;
+	/* outline: 1px solid #ccc; */
+}
+.pie-chart .caption-inside{
+  font-size:10px;
+  position:absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

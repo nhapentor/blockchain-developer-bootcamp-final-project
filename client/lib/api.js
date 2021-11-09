@@ -36,6 +36,12 @@ async function fetchAPI(query, { variables } = {}) {
         email
         signature
         timestamp
+        points
+        avatar { 
+          id
+          url
+        }
+        isOnboarded
       }
     }
     `,
@@ -63,6 +69,12 @@ async function fetchAPI(query, { variables } = {}) {
             email
             signature
             timestamp
+            points
+            avatar { 
+              id
+              url  
+            }
+            isOnboarded
           }
         }
       }
@@ -80,7 +92,7 @@ async function fetchAPI(query, { variables } = {}) {
   export async function updateEmployee(employee) {
 
     const id = Number(employee.id)
-    const input = {...employee, id: undefined }
+    const input = {...employee, id: undefined, avatar: Number(employee.avatar.id) } 
 
     const data = await fetchAPI(
       `
@@ -90,11 +102,17 @@ async function fetchAPI(query, { variables } = {}) {
           data: $employee }) {
           employee {
             id
+            avatar { 
+              id
+              url  
+            }
             account
             name
             email
             signature
             timestamp
+            points
+            isOnboarded
           }
         }
       }
@@ -108,4 +126,66 @@ async function fetchAPI(query, { variables } = {}) {
     )
 
     return data.updateEmployee.employee
+  }
+
+  export async function updateEmployeeSignature(employeeId, signature = '', timestamp = 0) {
+
+    const id = Number(employeeId)
+    const data = { signature, timestamp } 
+
+    const res = await fetchAPI(
+      `
+      mutation updateEmployee($employee: editEmployeeInput, $where: InputID) {
+        updateEmployee(input: { 
+          where: $where
+          data: $employee }) {
+          employee {
+            id
+            avatar { 
+              id
+              url  
+            }
+            account
+            name
+            email
+            signature
+            timestamp
+            points
+          }
+        }
+      }
+      `,
+      {
+        variables: {
+          employee: data,
+          where: { id }
+        },
+      }
+    )
+
+    return res.updateEmployee.employee
+  }
+
+  export async function uploadMedia(image) {
+
+    const formData = new FormData();
+    formData.append('files', image)
+
+    const res = await fetch(`http://localhost:1337/upload`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json'
+      },
+      body: formData
+    })
+  
+    const json = await res.json()
+
+    if (json.errors) {
+      console.error(json.errors)
+      throw new Error('Failed to fetch API')
+    }
+  
+    return json[0]
+    
   }

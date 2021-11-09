@@ -8,7 +8,7 @@ const Layout = ({ children, ...rest }) => {
         <>
             <Navbar employee={rest.employee} />
             <main>{children}</main>
-            <Footer />
+            {/* <Footer /> */}
         </>
     )
 }

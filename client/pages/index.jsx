@@ -27,15 +27,19 @@ export default () => {
     }
   }, [active, account])
 
-  return (
-    <div>
-      <div>Connect wallet to use the platform</div>
+  return (    
+    <div className="container">
+      { !active &&
+        <div className="row justify-content-center">                            
+            <div className="col-11 col-sm-10 col-md-10 col-lg-6 col-xl-5 text-center p-0 mt-3">
+                <div className="card px-4 py-4 my-2 text-center">
+                  <p>Connect wallet to use the platform</p>
 
-      <div>
-            {
-              !active && <a onClick={() => connect()} className="btn btn-gra btn-sm w-150">{t('Connect Wallet')}</a>
-            }
-      </div>
+                  <p><a onClick={() => connect()} className="btn btn-gra btn-sm w-150">{t('Connect Wallet')}</a></p>
+                </div>
+            </div>
+        </div>
+      }
     </div>
   )
 

@@ -863,7 +863,7 @@ select { background: none; }
 }
 
 .progress-bar {
-  background-color: #102ce7;
+  background: linear-gradient(92.82deg, #ff409a 2.03%, #ad49fb 57.42%, #6331d1 99.85%);
 }
 
 #dropdown-clon-right {

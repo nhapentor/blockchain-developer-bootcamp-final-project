@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl';
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useWeb3React } from "@web3-react/core"
 import { injected } from "./wallet/connectors"
-import { updateEmployee } from '../lib/api';
+import { updateEmployeeSignature } from '../lib/api';
 
 const Navbar = ({ employee }) => {
 
@@ -11,10 +11,18 @@ const Navbar = ({ employee }) => {
 
   const { active, account, activate, deactivate } = useWeb3React()
 
+  const [isActive, setActive] = useState(active)
+
+  useEffect(() => {
+    setActive(active && account)
+  }, [active])
+
   async function connect() {
     try {
       await activate(injected)
       window.localStorage.setItem('connectorIdv2', 'injected')
+
+      console.log(active)
     } catch (ex) {
       console.log(ex)
     }
@@ -24,10 +32,11 @@ const Navbar = ({ employee }) => {
     try {
       deactivate()
       
-      const data = {...employee, signature: '', timestamp: 0}
-      console.log(data)
-      await updateEmployee(data)
+      await updateEmployeeSignature(employee.id, '', 0)
+
       window.localStorage.removeItem('connectorIdv2')
+
+      console.log(active)
     } catch (ex) {
       console.log(ex)
     }
@@ -52,7 +61,7 @@ const Navbar = ({ employee }) => {
           </ul>
           <div className="d-flex">
             {
-              !active 
+              !isActive 
               ? <a onClick={() => connect()} className="btn btn-gra btn-sm w-150">{t('Connect Wallet')}</a>
               : <a onClick={() => disconnect()} className="btn btn-gra btn-sm w-150">{t('Disconnect Wallet')}</a>
             }
