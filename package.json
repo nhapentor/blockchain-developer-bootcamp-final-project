@@ -19,6 +19,10 @@
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
+    "solc": "^0.8.10",
     "standard": "^16.0.4"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.2"
   }
 }
