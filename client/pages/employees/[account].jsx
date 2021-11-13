@@ -5,8 +5,14 @@ import { useWeb3React } from "@web3-react/core"
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { getRankByPoints, getNextRankByPoints } from '../../lib/ranks'
+import getContract from '../../lib/getContract'
+import contractDefinition from '../../../build/contracts/XABER.json'
+import getGsnProvider from '../../lib/getRelayProvider'
 
 const EmployeePage = ({ employee }) => {
+
+    const [amount, setAmount] = useState(0.0)
+    const [receiver, setReceiver] = useState("")
 
     const [isAuthenticated, setAuthenticated] = useState(false)
 
@@ -38,6 +44,7 @@ const EmployeePage = ({ employee }) => {
             library.eth.personal.ecRecover(t('Message to be signed', { timestamp: employee.timestamp }), employee.signature)
             .then((acc) => {
                 setAuthenticated(acc === employee.account.toLowerCase())
+                getPoints()
             })                       
         } 
     }
@@ -63,9 +70,24 @@ const EmployeePage = ({ employee }) => {
   
     };
 
+    const onAmountChanged = async (e) => {
+        setAmount(e.target.value)  
+    };
+
+    const onReceiverChanged = async (e) => {
+        setReceiver(e.target.value)  
+    }
+
+    const onTransfer = async (e) => {
+        const w3 = await getGsnProvider()
+        const contract = await getContract(w3, contractDefinition)
+        await contract.methods.transfer(library.utils.toChecksumAddress(receiver), library.utils.toWei(amount)).send({ from: account })
+        getPoints()
+    }
+
     const onImageChange = async (e) => {
         setAvatarImage(e.target.files[0])  
-    };
+    }
 
     const onNextStep = () => {
         setOnboardStep(onboardStep + 1 )
@@ -90,6 +112,17 @@ const EmployeePage = ({ employee }) => {
         setUser({...user, name: employee.name, email: employee.email, avatar: {id: media.id, url: media.url}, isOnboarded: true, points: 200 })
     }
 
+    const getPoints = () => {
+
+        (async () => {
+            const contract = await getContract(library, contractDefinition)
+            const balance = await contract.methods.balanceOf(account).call({ from: account })
+
+            setUser({...user, points: balance / 1e18})
+        })();
+
+    }
+
     useEffect(() => {
         switch(onboardStep) {
             case 1: {
@@ -109,84 +142,95 @@ const EmployeePage = ({ employee }) => {
     return (
         <>
             { isAuthenticated ? 
-            <>
-                <div className="container">
-                    { 
-                    user.isOnboarded ?
-                    <>
-                        <div className="row justify-content-center mt-3">
-                            <div className="col-2 h-150 pr-0 img-cover" style={{borderRadius: "8px 0px 0px 8px"}}>
-                                <img src={`http://localhost:1337${user.avatar.url}`} className="img-fluid center" style={{maxWidth: "100%", height: "auto"}} alt="user" />
-                            </div>
-                            <div className="col-6 bg-white p-4">
-                                <h3 className="text-w-600">{user.name}</h3>
-                                <p>{user.email}</p>
-                            </div>
-                            <div className="col-2 h-150 pr-0 py-1 bg-white text-center" style={{display: "flex", flexDirection: "column", justifyContent: "center"}}>
-                                <div>
-                                    <img src={getRankByPoints(user.points).imageUrl} width="50" />
-                                    <div>rank: <strong>{getRankByPoints(user.points).rank}</strong></div>
-                                    <div>points: <strong>{user.points}</strong></div>
-                                </div>
-                                
-                            </div>    
-                            <div className="col-2 h-150 pr-0 bg-white text-center" style={{ borderRadius: "0px 8px 8px 0px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                                <figure className="pie-chart" style={{background: `radial-gradient(circle closest-side, white 0, white 52.8%, transparent 52.8%, transparent 60%, white 0 ), conic-gradient(#ad49fb 0, #ad49fb ${100 - ((getNextRankByPoints(user.points).points - user.points) / (getNextRankByPoints(user.points).points - (getRankByPoints(user.points).points)) * 100)}%, #ccc 0, #ccc 100% )`}}>
-                                    <div className="caption-inside" >
-                                        <img src={getNextRankByPoints(user.points).imageUrl} width="50" />  
-                                        <div>{getNextRankByPoints(user.points).rank}</div>
-                                        <div>+{getNextRankByPoints(user.points).points - user.points}</div>
-                                    </div>                                    
-                                </figure>
-                            </div>
-                        </div>
-                        <div className="row justify-content-center mt-3">
-                            <div className="col-6 bg-white p-0" style={{borderRadius: "8px"}} >
-                            <div className="card">
-  <div className="card-header">Latest Events</div>
-  <div className="card-body">
-    <div style={{display: "flex"}}>
-        <div style={{width: "15%"}}>
-            <img src="https://res.cloudinary.com/hy4kyit2a/f_auto,fl_lossy,q_70/learn/modules/apex_testing/2d3d525254af58a32f2325da207505ea_badge.png" width="100%"/>            
-        </div>
-        <div style={{flexGrow: 1, paddingLeft: "1rem"}}>
-            <h5 className="card-title">Lorem ipsum dolor sit amet</h5>
-            <p className="card-text">un testo segnaposto utilizzato nel settore della tipografia e della stampa.</p>
-            <p style={{fontSize: "12px", fontWeight: "600"}}>+120 points</p>
-            {/* <a href="#" className="btn btn-gra btn-sm w-150">Go somewhere</a> */}
-        </div>
-    </div>
-  </div>
-  <div className="card-body">
-    <div style={{display: "flex"}}>
-        <div style={{width: "15%"}}>
-            <img src="https://res.cloudinary.com/hy4kyit2a/f_auto,fl_lossy,q_70/learn/modules/behavioral-triggers-in-journey-builder/5d4075dd3f70a1835b23acb1bb4e907c_badge.png" width="100%"/>            
-        </div>
-        <div style={{flexGrow: 1, paddingLeft: "1rem"}}>
-            <h5 className="card-title">Sed do eiusmod tempor incididunt</h5>
-            <p className="card-text">Lorem Ipsum è considerato il testo segnaposto standard sin dal.</p>
-            <p style={{fontSize: "12px", fontWeight: "600"}}>+150 points</p>
-            {/* <a href="#" className="btn btn-gra btn-sm w-150">Go somewhere</a> */}
-        </div>
-    </div>
-  </div>
-  <div className="card-body">
-    <div style={{display: "flex"}}>
-        <div style={{width: "15%"}}>
-            <img src="https://res.cloudinary.com/hy4kyit2a/f_auto,fl_lossy,q_70/learn/modules/accounts_contacts_lightning_experience/b84df67136a004253f0624ee68e0c9f2_badge.png" width="100%"/>            
-        </div>
-        <div style={{flexGrow: 1, paddingLeft: "1rem"}}>
-            <h5 className="card-title">At vero eos et accusamus et iusto odio</h5>
-            <p className="card-text">Nam libero tempore, cum soluta nobis est eligendi optio cumque.</p>
-            <p style={{fontSize: "12px", fontWeight: "600"}}>+180 points</p>
-            {/* <a href="#" className="btn btn-gra btn-sm w-150">Go somewhere</a> */}
-        </div>
-    </div>
-  </div>
-</div>
-                            </div>                            
-                        </div>
-                    </>
+                <>
+                    <div className="container">
+                        {
+                            user.isOnboarded ?
+                                <>
+                                    <div className="row justify-content-center mt-3">
+                                        <div className="col-2 h-150 pr-0 img-cover" style={{ borderRadius: "8px 0px 0px 8px" }}>
+                                            <img src={`http://localhost:1338${user.avatar.url}`} className="img-fluid center" style={{ maxWidth: "100%", height: "auto" }} alt="user" />
+                                        </div>
+                                        <div className="col-6 bg-white p-4">
+                                            <h3 className="text-w-600">{user.name}</h3>
+                                            <p>{user.email}</p>
+                                        </div>
+                                        <div className="col-2 h-150 pr-0 py-1 bg-white text-center" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                                            <div>
+                                                <img src={getRankByPoints(user.points).imageUrl} width="50" />
+                                                <div>rank: <strong>{getRankByPoints(user.points).rank}</strong></div>
+                                                <div>points: <strong>{user.points}</strong></div>
+                                            </div>
+
+                                        </div>
+                                        <div className="col-2 h-150 pr-0 bg-white text-center" style={{ borderRadius: "0px 8px 8px 0px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                                            <figure className="pie-chart" style={{ background: `radial-gradient(circle closest-side, white 0, white 52.8%, transparent 52.8%, transparent 60%, white 0 ), conic-gradient(#ad49fb 0, #ad49fb ${100 - ((getNextRankByPoints(user.points).points - user.points) / (getNextRankByPoints(user.points).points - (getRankByPoints(user.points).points)) * 100)}%, #ccc 0, #ccc 100% )` }}>
+                                                <div className="caption-inside" >
+                                                    <img src={getNextRankByPoints(user.points).imageUrl} width="50" />
+                                                    <div>{getNextRankByPoints(user.points).rank}</div>
+                                                    <div>+{getNextRankByPoints(user.points).points - user.points}</div>
+                                                </div>
+                                            </figure>
+                                        </div>
+                                    </div>
+                                    <div className="row justify-content-center mt-3">
+                                        <div className="col-6 bg-white p-0" style={{ borderRadius: "8px" }} >
+                                            <div className="card">
+                                                <div className="card-body">
+                                                    <input type="text" value={amount} onChange={onAmountChanged} placeholder="0.01" />
+                                                    <input type="text" value={receiver} onChange={onReceiverChanged} placeholder="0x..." />
+                                                    <button className="btn btn-gra btn-sm w-150" onClick={onTransfer}>Send</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="row justify-content-center mt-3">
+                                        <div className="col-6 bg-white p-0" style={{ borderRadius: "8px" }} >
+                                            <div className="card">
+                                                <div className="card-header">Latest Events</div>
+                                                <div className="card-body">
+                                                    <div style={{ display: "flex" }}>
+                                                        <div style={{ width: "15%" }}>
+                                                            <img src="https://res.cloudinary.com/hy4kyit2a/f_auto,fl_lossy,q_70/learn/modules/apex_testing/2d3d525254af58a32f2325da207505ea_badge.png" width="100%" />
+                                                        </div>
+                                                        <div style={{ flexGrow: 1, paddingLeft: "1rem" }}>
+                                                            <h5 className="card-title">Lorem ipsum dolor sit amet</h5>
+                                                            <p className="card-text">un testo segnaposto utilizzato nel settore della tipografia e della stampa.</p>
+                                                            <p style={{ fontSize: "12px", fontWeight: "600" }}>+120 points</p>
+                                                            {/* <a href="#" className="btn btn-gra btn-sm w-150">Go somewhere</a> */}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="card-body">
+                                                    <div style={{ display: "flex" }}>
+                                                        <div style={{ width: "15%" }}>
+                                                            <img src="https://res.cloudinary.com/hy4kyit2a/f_auto,fl_lossy,q_70/learn/modules/behavioral-triggers-in-journey-builder/5d4075dd3f70a1835b23acb1bb4e907c_badge.png" width="100%" />
+                                                        </div>
+                                                        <div style={{ flexGrow: 1, paddingLeft: "1rem" }}>
+                                                            <h5 className="card-title">Sed do eiusmod tempor incididunt</h5>
+                                                            <p className="card-text">Lorem Ipsum è considerato il testo segnaposto standard sin dal.</p>
+                                                            <p style={{ fontSize: "12px", fontWeight: "600" }}>+150 points</p>
+                                                            {/* <a href="#" className="btn btn-gra btn-sm w-150">Go somewhere</a> */}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="card-body">
+                                                    <div style={{ display: "flex" }}>
+                                                        <div style={{ width: "15%" }}>
+                                                            <img src="https://res.cloudinary.com/hy4kyit2a/f_auto,fl_lossy,q_70/learn/modules/accounts_contacts_lightning_experience/b84df67136a004253f0624ee68e0c9f2_badge.png" width="100%" />
+                                                        </div>
+                                                        <div style={{ flexGrow: 1, paddingLeft: "1rem" }}>
+                                                            <h5 className="card-title">At vero eos et accusamus et iusto odio</h5>
+                                                            <p className="card-text">Nam libero tempore, cum soluta nobis est eligendi optio cumque.</p>
+                                                            <p style={{ fontSize: "12px", fontWeight: "600" }}>+180 points</p>
+                                                            {/* <a href="#" className="btn btn-gra btn-sm w-150">Go somewhere</a> */}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
                         :
                         <>
                             <div className="row justify-content-center">                            
