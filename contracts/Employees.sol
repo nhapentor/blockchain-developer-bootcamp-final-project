@@ -1,15 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "./XABER.sol";
 import "./Employee.sol";
 
 contract Employees {
     
+    XABER tokenContract;
+
     mapping(address => Employee) public employees;
     mapping(uint256 => bool) public employeeIds;
 
     uint256 public employeeCount;
-    
+
     modifier doesNotExist(uint256 _id, address _address)  {
         require(_id > 0 && !employeeIds[_id]  && employees[_address].id == 0);
         _;
@@ -20,7 +23,8 @@ contract Employees {
      */
     event LogNewEmployee(uint256 id, string name, string email);
     
-    constructor() {
+    constructor(address _tokenContract) {
+        tokenContract = XABER(_tokenContract);
         employeeCount = 0;
     }
     
@@ -37,6 +41,8 @@ contract Employees {
         
         employeeIds[_id] = true;
         employeeCount += 1;
+
+        tokenContract.mint(msg.sender, 10000000000000000000);
 
         emit LogNewEmployee(_id, _name, _email);
         return true;

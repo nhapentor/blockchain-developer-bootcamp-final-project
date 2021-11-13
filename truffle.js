@@ -9,7 +9,7 @@ module.exports = {
   networks: {
     development: {
       provider: () =>
-        new HDWalletProvider(process.env.PRIVATE_KEY, "http://127.0.0.1:8545"),
+        new HDWalletProvider(process.env.MNEMONIC, "http://127.0.0.1:8545", 0, 3),
       network_id: '*' // Match any network id
     }
   },

@@ -14,6 +14,10 @@ contract XABER is ERC20, AccessControl, ERC2771Context {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MINTER_ROLE, msg.sender);
     }
+    
+    function addMinter(address minter) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setupRole(MINTER_ROLE, minter);
+    }
 
     function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
         _mint(to, amount);

@@ -7,5 +7,9 @@ module.exports = async (deployer) => {
 
   await deployer.deploy(Xaber, forwarder)
 
-  await deployer.deploy(Employees)
+  await deployer.deploy(Employees, Xaber.address)
+
+  const xaberInstance = await Xaber.deployed();
+
+  await xaberInstance.addMinter(Employees.address);
 }
