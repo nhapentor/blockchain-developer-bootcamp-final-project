@@ -5,7 +5,6 @@ import { useWeb3React } from "@web3-react/core"
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { getRankByPoints, getNextRankByPoints } from '../../lib/ranks'
-import { bottom } from '@popperjs/core'
 
 const EmployeePage = ({ employee }) => {
 

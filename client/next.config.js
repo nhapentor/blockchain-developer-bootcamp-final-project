@@ -1,7 +1,14 @@
 module.exports = {
-  webpack: (config, { buildId, dev }) => {
+  webpack: (config, { buildId, dev, isServer }) => {
     // This allows the app to refer to files through our symlink
     config.resolve.symlinks = false
+
+    if (!isServer) {
+      // don't resolve 'fs' module on the client to prevent this error on build --> Error: Can't resolve 'fs'
+      config.resolve.fallback = {
+          fs: false, stream: false, crypto: false, querystring: false, http: false, https: false, os: false, zlib: false, path: false
+      }
+  }
     return config
   },
   i18n: {

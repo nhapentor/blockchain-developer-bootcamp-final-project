@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { useTranslations } from 'next-intl';
 import React, { useEffect, useState } from 'react'
 import { useWeb3React } from "@web3-react/core"
@@ -21,8 +20,6 @@ const Navbar = ({ employee }) => {
     try {
       await activate(injected)
       window.localStorage.setItem('connectorIdv2', 'injected')
-
-      console.log(active)
     } catch (ex) {
       console.log(ex)
     }
@@ -31,17 +28,12 @@ const Navbar = ({ employee }) => {
   async function disconnect() {
     try {
       deactivate()
-      
       await updateEmployeeSignature(employee.id, '', 0)
-
       window.localStorage.removeItem('connectorIdv2')
-
-      console.log(active)
     } catch (ex) {
       console.log(ex)
     }
   }
-
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-navy">

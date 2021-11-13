@@ -1,7 +1,8 @@
-const SimpleStorage = artifacts.require('./SimpleStorage.sol')
 const Xaber = artifacts.require('./XABER.sol')
 
-module.exports = function (deployer) {
-  deployer.deploy(SimpleStorage)
-  deployer.deploy(Xaber)
+module.exports = async (deployer) => {
+  
+  const forwarder = require('../build/gsn/Forwarder.json').address
+
+  await deployer.deploy(Xaber, forwarder)
 }

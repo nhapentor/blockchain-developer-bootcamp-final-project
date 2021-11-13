@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "lint": "standard"
+    "lint": "standard",
+    "gsn": "gsn start"
   },
   "standard": {
     "parser": "babel-eslint",
@@ -18,11 +19,17 @@
     ]
   },
   "devDependencies": {
+    "@opengsn/dev": "^2.2.4",
     "babel-eslint": "^10.1.0",
     "solc": "^0.8.10",
-    "standard": "^16.0.4"
+    "standard": "^16.0.4",
+    "web3": "^1.6.0",
+    "web3-utils": "^1.6.0"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.3.2"
+    "@opengsn/contracts": "^2.2.4",
+    "@openzeppelin/contracts": "^4.3.2",
+    "dotenv": "^10.0.0",
+    "truffle-hdwallet-provider": "^1.0.17"
   }
 }
