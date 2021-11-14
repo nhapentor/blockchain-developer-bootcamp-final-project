@@ -7,6 +7,8 @@ contract("Employees", function (accounts) {
 
   const [admin, alice, bob] = accounts
 
+  const emptyAddress = "0x0000000000000000000000000000000000000000";
+
   const aliceProfile = {
     id: 123,
     name: "Alice",
@@ -25,12 +27,12 @@ contract("Employees", function (accounts) {
 
   beforeEach(async () => {
     tokenInstance = await Xaber.deployed()
-    instance = await Employees.new(tokenInstance.address);
+    instance = await Employees.new(tokenInstance.address, emptyAddress);
     await tokenInstance.addMinter(instance.address)
   });
 
   it("should add a new employee with provided profile", async function () {
-    await instance.newEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, { from: alice })
+    await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, { from: alice })
 
     const count = await instance.employeeCount.call()
 
@@ -71,7 +73,7 @@ contract("Employees", function (accounts) {
       "The account must start with 0 token",
     );
     
-    await instance.newEmployee(bobProfile.id, bobProfile.name, bobProfile.email, { from: bob })
+    await instance.addEmployee(bobProfile.id, bobProfile.name, bobProfile.email, { from: bob })
 
     const afterOnboardingAmount = await tokenInstance.balanceOf(bob)
 
@@ -83,18 +85,35 @@ contract("Employees", function (accounts) {
 
   })
 
-  it("should error create new employee from the same account more than once", async function() {
+  it("should error when adding new employee from the same account more than once", async function() {
 
-    await instance.newEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, { from: alice })
+    await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, { from: alice })
 
-    await catchRevert(instance.newEmployee(bobProfile.id, bobProfile.name, bobProfile.email, { from: alice }));
+    await catchRevert(instance.addEmployee(bobProfile.id, bobProfile.name, bobProfile.email, { from: alice }));
   });
 
-  it("should error create new employee with duplicated id", async function() {
+  it("should error when adding new employee with duplicated id", async function() {
 
-    await instance.newEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, { from: alice })
+    await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, { from: alice })
 
-    await catchRevert(instance.newEmployee(aliceProfile.id, bobProfile.name, bobProfile.email, { from: bob }));
+    await catchRevert(instance.addEmployee(aliceProfile.id, bobProfile.name, bobProfile.email, { from: bob }));
+  });
+
+  it("should emit a LogEmployeeAdded event when an employee is added", async () => {
+    
+    var eventEmitted = false;
+
+    const tx = await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, { from: alice })
+
+    if (tx.logs[0].event == "LogEmployeeAdded") {
+      eventEmitted = true;
+    }
+
+    assert.equal(
+      eventEmitted,
+      true,
+      "adding an employee should emit a LogEmployeeAdded event",
+    );
   });
 
 });

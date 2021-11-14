@@ -7,6 +7,7 @@ import { useRouter } from 'next/router'
 import { getRankByPoints, getNextRankByPoints } from '../../lib/ranks'
 import getContract from '../../lib/getContract'
 import contractDefinition from '../../../build/contracts/XABER.json'
+import employeesContractDefinition from '../../../build/contracts/Employees.json'
 import getGsnProvider from '../../lib/getRelayProvider'
 
 const EmployeePage = ({ employee }) => {
@@ -108,15 +109,31 @@ const EmployeePage = ({ employee }) => {
     const onFinish = async () => {
         const media = await uploadMedia(avatarImage)
         const data = { id: employee.id, name: employee.name, email: employee.email, avatar: {id: media.id}, isOnboarded: true, points: 200 }
+       
+
+
+
+        const w3 = await getGsnProvider()
+        const contract = await getContract(w3, employeesContractDefinition)
+        console.log(data.id, data.name, data.name)
+        const res = await contract.methods.addEmployee(data.id, data.name, data.email).send({ from: account })
+        
+
+        console.log("res", res)
+
         await updateEmployee(data)
         setUser({...user, name: employee.name, email: employee.email, avatar: {id: media.id, url: media.url}, isOnboarded: true, points: 200 })
+        getPoints()
     }
 
     const getPoints = () => {
 
         (async () => {
             const contract = await getContract(library, contractDefinition)
+            
             const balance = await contract.methods.balanceOf(account).call({ from: account })
+            console.log('account', account)
+            console.log('balance', balance)
 
             setUser({...user, points: balance / 1e18})
         })();
@@ -313,7 +330,7 @@ const EmployeePage = ({ employee }) => {
                                                     </div>
                                                     <div className="row justify-content-center my-2">
                                                         <div className="col-3 text-center">
-                                                            <i class="fa fas fa-check" style={{fontSize: "64px", color: "#ad49fb"}}></i>                                                            
+                                                            <i className="fa fas fa-check" style={{fontSize: "64px", color: "#ad49fb"}}></i>                                                            
                                                         </div>                                                        
                                                     </div>
                                                     <div className="row justify-content-center">

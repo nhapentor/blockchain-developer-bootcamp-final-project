@@ -4,7 +4,9 @@ pragma solidity ^0.8.0;
 import "./XABER.sol";
 import "./Employee.sol";
 
-contract Employees {
+import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
+
+contract Employees is ERC2771Context {
     
     XABER tokenContract;
 
@@ -21,19 +23,21 @@ contract Employees {
     /*
      * Events
      */
-    event LogNewEmployee(uint256 id, string name, string email);
+    event LogEmployeeAdded(uint256 id, string name, string email);
     
-    constructor(address _tokenContract) {
+    constructor(address _tokenContract, address _trustedForwarder) 
+    ERC2771Context(_trustedForwarder)
+    {
         tokenContract = XABER(_tokenContract);
         employeeCount = 0;
     }
     
-    function newEmployee(uint256 _id, string memory _name, string memory _email) 
+    function addEmployee(uint256 _id, string memory _name, string memory _email) 
     public 
-    doesNotExist(_id, msg.sender) 
+    doesNotExist(_id, _msgSender()) 
     returns (bool) 
     {
-        employees[msg.sender] = Employee({
+        employees[_msgSender()] = Employee({
             id: _id,
             name: _name,
             email: _email
@@ -42,9 +46,9 @@ contract Employees {
         employeeIds[_id] = true;
         employeeCount += 1;
 
-        tokenContract.mint(msg.sender, 10000000000000000000);
+        tokenContract.mint(_msgSender(), 10000000000000000000);
 
-        emit LogNewEmployee(_id, _name, _email);
+        emit LogEmployeeAdded(_id, _name, _email);
         return true;
     }
 }
