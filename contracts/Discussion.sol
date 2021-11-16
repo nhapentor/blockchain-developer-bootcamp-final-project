@@ -20,6 +20,7 @@ contract Discussion is Ownable, ERC2771Context {
     uint256 public approvedReply;
     uint256 public replyCount;
     
+    
     Reply[] public replies;
     
     constructor(string memory _title, string memory _description, address _token, address _trustedForwarder) 
@@ -59,6 +60,10 @@ contract Discussion is Ownable, ERC2771Context {
         token.transfer(replies[replyIndex].replier, amount);
         
         return true;
+    }
+
+    function getAllReplies() public view returns (Reply[] memory) {
+        return replies;
     }
     
     function _msgSender() internal view virtual override(Context, ERC2771Context) returns (address sender) {

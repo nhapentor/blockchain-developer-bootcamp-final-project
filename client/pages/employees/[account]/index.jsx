@@ -1,14 +1,14 @@
 
-import { getEmployeeByAccount, createEmployee, updateEmployee, updateEmployeeSignature, uploadMedia } from '../../lib/api'
+import { getEmployeeByAccount, createEmployee, updateEmployee, updateEmployeeSignature, uploadMedia } from '../../../lib/api'
 import { useTranslations } from 'next-intl'
 import { useWeb3React } from "@web3-react/core"
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { getRankByPoints, getNextRankByPoints } from '../../lib/ranks'
-import getContract from '../../lib/getContract'
-import contractDefinition from '../../../build/contracts/XABER.json'
-import employeesContractDefinition from '../../../build/contracts/Employees.json'
-import getGsnProvider from '../../lib/getRelayProvider'
+import { getRankByPoints, getNextRankByPoints } from '../../../lib/ranks'
+import getContract from '../../../lib/getContract'
+import contractDefinition from '../../../../build/contracts/XABER.json'
+import employeesContractDefinition from '../../../../build/contracts/Employees.json'
+import getGsnProvider from '../../../lib/getRelayProvider'
 
 const EmployeePage = ({ employee }) => {
 
@@ -30,6 +30,9 @@ const EmployeePage = ({ employee }) => {
     const { active, account, library } = useWeb3React()
 
     const [avatarImage, setAvatarImage] = useState()
+    const [avatarImageSrc, setAvatarImageSrc] = useState('')
+
+    const [warnEmail, setWarnEmail] = useState(false)
 
     useEffect(() => {
         if (!active) {
@@ -88,6 +91,7 @@ const EmployeePage = ({ employee }) => {
 
     const onImageChange = async (e) => {
         setAvatarImage(e.target.files[0])  
+        setAvatarImageSrc(URL.createObjectURL(e.target.files[0]))
     }
 
     const onNextStep = () => {
@@ -100,30 +104,47 @@ const EmployeePage = ({ employee }) => {
 
     const onNameChange = (e) => {
         employee.name = e.target.value
+        setUser({...user, name: e.target.value})
+
     }
 
     const onEmailChange = (e) => {
         employee.email = e.target.value
+
+        if (validateEmail(employee.email)) {
+            setUser({...user, email: e.target.value})
+            setWarnEmail(false)
+        } else {
+            setUser({...user, email: ''})
+            setWarnEmail(true)
+        }
     }
 
     const onFinish = async () => {
+
+
         const media = await uploadMedia(avatarImage)
-        const data = { id: employee.id, name: employee.name, email: employee.email, avatar: {id: media.id}, isOnboarded: true, points: 200 }
+
+        const data = { id: employee.id, name: employee.name, email: employee.email, avatar: {id: media.id}, isOnboarded: true }
        
-
-
 
         const w3 = await getGsnProvider()
         const contract = await getContract(w3, employeesContractDefinition)
-        console.log(data.id, data.name, data.name)
+
         const res = await contract.methods.addEmployee(data.id, data.name, data.email).send({ from: account })
         
-
-        console.log("res", res)
+        const tokenContract = await getContract(library, contractDefinition)
+            
+        const balance = await tokenContract.methods.balanceOf(account).call({ from: account })
 
         await updateEmployee(data)
-        setUser({...user, name: employee.name, email: employee.email, avatar: {id: media.id, url: media.url}, isOnboarded: true, points: 200 })
-        getPoints()
+        setUser({...user, name: employee.name, email: employee.email, avatar: {id: media.id, url: media.url}, isOnboarded: true, points: balance / 1e18 })
+
+    }
+
+    const validateEmail = (email) => {
+        const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
     }
 
     const getPoints = () => {
@@ -132,8 +153,6 @@ const EmployeePage = ({ employee }) => {
             const contract = await getContract(library, contractDefinition)
             
             const balance = await contract.methods.balanceOf(account).call({ from: account })
-            console.log('account', account)
-            console.log('balance', balance)
 
             setUser({...user, points: balance / 1e18})
         })();
@@ -251,7 +270,7 @@ const EmployeePage = ({ employee }) => {
                         :
                         <>
                             <div className="row justify-content-center">                            
-                                <div className="col-11 col-sm-10 col-md-10 col-lg-6 col-xl-5 text-center p-0 mt-3">
+                                <div className="col-6 text-center p-0 mt-3">
                                     <div className="card px-4 py-4 my-2">
                                         <div className="mb-1" style={{display: "flex", width: "100%"}}>
                                             <div>
@@ -271,50 +290,63 @@ const EmployeePage = ({ employee }) => {
                                 </div>
                             </div>
                             <div className="row justify-content-center">                            
-                                <div className="col-11 col-sm-10 col-md-10 col-lg-6 col-xl-5 text-center p-0 mt-3 mb-2">
-                                    <div className="card px-0 pt-4 pb-0 mt-3 mb-3">
-                                        <h2 id="heading">Setup Your Account</h2>
+                                <div className="col-6 text-center p-0 mt-3 mb-2">
+                                    <div className="card px-0 py-0 mt-3 mb-3">
+                                        <div className="card-header">Setup Your Account</div>
 
                                         <form id="msform">
                                             <ul id="progressbar">
                                                 <li className={onboardStep > 0 ? "active": ""} id="personal"><strong>Profile</strong></li>
-                                                <li className={onboardStep > 1 ? "active": ""} id="payment"><strong>Image</strong></li>
-                                                <li className={onboardStep > 2 ? "active": ""} id="confirm"><strong>Finish</strong></li>
+                                                <li className={onboardStep > 1 ? "active": ""} id="payment"><strong>Photo</strong></li>
+                                                <li className={onboardStep > 2 ? "active": ""} id="confirm"><strong>Confirmation</strong></li>
                                             </ul>                                    
                                             <fieldset style={{display: onboardStep === 1 ? "block" : "none"}}>
                                                 <div className="form-card">
                                                     <div className="row">
                                                         <div className="col-7">
-                                                            <h2 className="fs-title">Profile Information:</h2>
+                                                            <p className="h5">Fill in your information</p>
                                                         </div>
                                                         <div className="col-5">
-                                                            <h2 className="steps">Step 1 / 3</h2>
+                                                            <p className="text-end h5 text-muted">Step 1 / 3</p>
                                                         </div>
                                                     </div> 
-                                                    <div style={{ padding: "16px" }}>
-                                                        <label className="fieldlabels">Name:</label> <input type="text" name="name" placeholder="Name" onChange={onNameChange} />
-                                                        <label className="fieldlabels">Email:</label> <input type="email" name="email" placeholder="Email" onChange={onEmailChange} />
+                                                    <div className="mt-4">
+                                                        <label className="fieldlabels">Name:</label> 
+                                                        <input type="text" className="form-control" name="name" onChange={onNameChange} />
+
+                                                        <div>
+                                                            <label className="fieldlabels">Email:</label>
+                                                            <span className={`float-end${warnEmail ? " text-danger": " d-none"}`}>Invalid email format</span>
+                                                        </div>
+                                                        <input type="email" pattern="/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/" className="form-control" name="email" onChange={onEmailChange} />
                                                     </div>
                                                 </div> 
                                                 <div style={{ padding: "16px" }}>
-                                                    <input type="button" name="next" className="next action-button" value="Next" onClick={onNextStep} />
+                                                    <input type="button" name="next" className="next action-button" value="Next" onClick={onNextStep} disabled={!user.name || !user.email} />
                                                 </div>
                                             </fieldset>
                                             <fieldset style={{display: onboardStep === 2 ? "block" : "none"}}>
                                                 <div className="form-card">
                                                     <div className="row">
                                                         <div className="col-7">
-                                                            <h2 className="fs-title">Image Upload:</h2>
+                                                            <p className="h5">Upload your profile photo</p>
                                                         </div>
                                                         <div className="col-5">
-                                                            <h2 className="steps">Step 2 / 3</h2>
+                                                            <p className="text-end h5 text-muted">Step 2 / 3</p>
                                                         </div>
                                                     </div> 
-                                                    <label className="fieldlabels">Upload Your Photo:</label> 
-                                                    <input type="file" name="pic" accept="image/*" onChange={onImageChange}/> 
+                                                    <div className="mt-4 text-center">
+                                                        <div className="m-1 bg-light" style={{ height: "200px", width: "200px", display: "inline-block", borderRadius: "0.25em"}}>
+                                                            <img src={avatarImageSrc} style={{ height: "200px", objectFi: "contain" }} className={avatarImageSrc ? '': 'd-none'} />
+                                                        </div> 
+                                                        <div>                                                       
+                                                        <label for="file-ip-1" className="btn btn-sm btn-outline-sec w-120 border border-secondary">Upload</label>
+                                                        <input id="file-ip-1" className="d-none" type="file" name="pic" accept="image/*" onChange={onImageChange} />
+                                                        </div>
+                                                    </div>
                                                 </div> 
                                                 <div style={{ padding: "16px" }}>
-                                                    <input type="button" name="next" className="next action-button" value="Next" onClick={onNextStep} />
+                                                    <input type="button" name="next" className="next action-button" value="Next" onClick={onNextStep} disabled={!avatarImage} />
                                                     <input type="button" name="previous" className="previous action-button-previous" value="Previous" onClick={onPreviousStep} />
                                                 </div>
                                             </fieldset>
@@ -322,22 +354,19 @@ const EmployeePage = ({ employee }) => {
                                                 <div className="form-card">
                                                     <div className="row">
                                                         <div className="col-7">
-                                                            <h2 className="fs-title">Confirm:</h2>
+                                                            <p className="h5">Confirm your information</p>
                                                         </div>
                                                         <div className="col-5">
-                                                            <h2 className="steps">Step 3 / 3</h2>
+                                                            <p className="text-end h5 text-muted">Step 3 / 3</p>
                                                         </div>
                                                     </div>
-                                                    <div className="row justify-content-center my-2">
-                                                        <div className="col-3 text-center">
-                                                            <i className="fa fas fa-check" style={{fontSize: "64px", color: "#ad49fb"}}></i>                                                            
-                                                        </div>                                                        
+                                                    <div className="mt-4 text-center">
+                                                        <div className="m-1 bg-light" style={{ height: "200px", width: "200px", display: "inline-block", borderRadius: "0.25em"}}>
+                                                            <img src={avatarImageSrc} style={{ height: "200px", objectFi: "contain" }} className={avatarImageSrc ? '': 'd-none'} />
+                                                        </div> 
                                                     </div>
-                                                    <div className="row justify-content-center">
-                                                        <div className="col-12 text-center">
-                                                            <h5 className="purple-text text-center">Finish this to earn 200 points!</h5>
-                                                        </div>
-                                                    </div>
+                                                    <p className="text-center my-2"><strong>Name:</strong>{user.name}</p>
+                                                    <p className="text-center my-2"><strong>Email:</strong> {user.email}</p>
                                                 </div>
                                                 <div style={{ padding: "16px" }}>
                                                     <input type="button" name="next" className="next action-button" value="Finish" onClick={onFinish} />
@@ -355,7 +384,7 @@ const EmployeePage = ({ employee }) => {
             </> :
             <div className="container">
                 <div className="row justify-content-center">                            
-                    <div className="col-11 col-sm-10 col-md-10 col-lg-6 col-xl-5 text-center p-0 mt-3">
+                    <div className="col-6 text-center p-0 mt-3">
                         <div className="card px-4 py-4 my-2 text-center">
                         <p>Sign message to continue</p>
 
@@ -373,7 +402,7 @@ export default EmployeePage
 
 export async function getServerSideProps({ params }) {
 
-    const messages = require('../../lib/i18n/en.json');
+    const messages = require('../../../lib/i18n/en.json');
     let data = await getEmployeeByAccount(params.account)
 
     if (!data) {
