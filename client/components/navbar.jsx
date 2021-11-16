@@ -63,7 +63,7 @@ const Navbar = ({ employee }) => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-navy">
       <div className="container">
-        <a className="navbar-brand" href="#">Employee Engagement</a>
+        <a className="navbar-brand" href="/">Employee-X</a>
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span className="navbar-toggler-icon"></span>
         </button>
@@ -78,12 +78,15 @@ const Navbar = ({ employee }) => {
                 <span className="nav-link active">{`${profile.tokenName}: +${profile.tokenAmount}`}</span>
               </li>
               <li className="nav-item dropdown">
-                <a className="nav-link dropdown-toggle" href="#" id="navbarScrollingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <a 
+                className="nav-link dropdown-toggle badge rounded-pill bg-light text-dark" 
+                style={{ fontSize: "medium", fontWeight: 600, lineHeight: 1.5}} 
+                href="#" id="navbarScrollingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   {`${profile.account.slice(0, 5)}...${profile.account.slice(-4)}`}
                 </a>
                 <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarScrollingDropdown">
-                  <li><a className="dropdown-item" href="#">Action</a></li>
-                  <li><hr className="dropdown-divider" /></li>
+                  {/* <li><a className="dropdown-item" href="#">Action</a></li>
+                  <li><hr className="dropdown-divider" /></li> */}
                   
                   <li><a onClick={() => disconnect()} className="dropdown-item">{t('Disconnect Wallet')}</a></li>
                 </ul>
