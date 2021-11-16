@@ -25,6 +25,31 @@ async function fetchAPI(query, { variables } = {}) {
     return json.data
   }
 
+  export async function getAllEmployees() {
+    const data = await fetchAPI(
+    `
+    query AllEmployees {
+      employees {
+        id            
+        account
+        name
+        email
+        signature
+        timestamp
+        points
+        avatar { 
+          id
+          url
+        }
+        isOnboarded
+      }
+    }
+    `,
+    )
+    return data?.employees
+  }
+
+
   export async function getEmployeeByAccount(account) {
     const data = await fetchAPI(
       `
@@ -54,6 +79,38 @@ async function fetchAPI(query, { variables } = {}) {
       }
     )
     return data?.employees[0]
+  }
+
+  export async function searchEmployeeByName(keyword) {
+    const data = await fetchAPI(
+      `
+    query EmployeeNameContain($where: JSON) {
+      employees(where: $where) {
+        id            
+        account
+        name
+        email
+        signature
+        timestamp
+        points
+        avatar { 
+          id
+          url
+        }
+        isOnboarded
+      }
+    }
+    `,
+      {
+        variables: {
+          where: { 
+            name_contains: keyword
+          },
+        },
+      }
+    )
+
+    return data?.employees
   }
 
   export async function createEmployee(employee) {

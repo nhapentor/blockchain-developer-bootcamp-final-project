@@ -5,15 +5,10 @@ import { useWeb3React } from "@web3-react/core"
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { getRankByPoints, getNextRankByPoints } from '../../../lib/ranks'
-import getContract from '../../../lib/getContract'
-import contractDefinition from '../../../../build/contracts/XABER.json'
-import employeesContractDefinition from '../../../../build/contracts/Employees.json'
+import { getEmployeesContract, getTokenContract } from '../../../lib/getContracts'
 import getGsnProvider from '../../../lib/getRelayProvider'
 
 const EmployeePage = ({ employee }) => {
-
-    const [amount, setAmount] = useState(0.0)
-    const [receiver, setReceiver] = useState("")
 
     const [isAuthenticated, setAuthenticated] = useState(false)
 
@@ -74,21 +69,6 @@ const EmployeePage = ({ employee }) => {
   
     };
 
-    const onAmountChanged = async (e) => {
-        setAmount(e.target.value)  
-    };
-
-    const onReceiverChanged = async (e) => {
-        setReceiver(e.target.value)  
-    }
-
-    const onTransfer = async (e) => {
-        const w3 = await getGsnProvider()
-        const contract = await getContract(w3, contractDefinition)
-        await contract.methods.transfer(library.utils.toChecksumAddress(receiver), library.utils.toWei(amount)).send({ from: account })
-        getPoints()
-    }
-
     const onImageChange = async (e) => {
         setAvatarImage(e.target.files[0])  
         setAvatarImageSrc(URL.createObjectURL(e.target.files[0]))
@@ -128,12 +108,12 @@ const EmployeePage = ({ employee }) => {
         const data = { id: employee.id, name: employee.name, email: employee.email, avatar: {id: media.id}, isOnboarded: true }
        
 
-        const w3 = await getGsnProvider()
-        const contract = await getContract(w3, employeesContractDefinition)
+        const gsnWeb3 = await getGsnProvider()
+        const employeeContract = await getEmployeesContract(gsnWeb3)
 
-        const res = await contract.methods.addEmployee(data.id, data.name, data.email).send({ from: account })
+        await employeeContract.methods.addEmployee(data.id, data.name, data.email).send({ from: account })
         
-        const tokenContract = await getContract(library, contractDefinition)
+        const tokenContract = await getTokenContract(library)
             
         const balance = await tokenContract.methods.balanceOf(account).call({ from: account })
 
@@ -150,9 +130,9 @@ const EmployeePage = ({ employee }) => {
     const getPoints = () => {
 
         (async () => {
-            const contract = await getContract(library, contractDefinition)
+            const tokenContract = await getTokenContract(library)
             
-            const balance = await contract.methods.balanceOf(account).call({ from: account })
+            const balance = await tokenContract.methods.balanceOf(account).call({ from: account })
 
             setUser({...user, points: balance / 1e18})
         })();
@@ -207,17 +187,6 @@ const EmployeePage = ({ employee }) => {
                                                     <div>+{getNextRankByPoints(user.points).points - user.points}</div>
                                                 </div>
                                             </figure>
-                                        </div>
-                                    </div>
-                                    <div className="row justify-content-center mt-3">
-                                        <div className="col-6 bg-white p-0" style={{ borderRadius: "8px" }} >
-                                            <div className="card">
-                                                <div className="card-body">
-                                                    <input type="text" value={amount} onChange={onAmountChanged} placeholder="0.01" />
-                                                    <input type="text" value={receiver} onChange={onReceiverChanged} placeholder="0x..." />
-                                                    <button className="btn btn-gra btn-sm w-150" onClick={onTransfer}>Send</button>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                     <div className="row justify-content-center mt-3">
