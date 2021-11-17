@@ -51,6 +51,8 @@ export default ({ employees }) => {
         const gsnWeb3 = await getGsnProvider()        
         const tokenContract = await getTokenContract(gsnWeb3)
         await tokenContract.methods.transfer(library.utils.toChecksumAddress(colleague[0].account), library.utils.toWei(amount.toString())).send({ from: account })
+
+        window.location.assign(`/employees/${account}`)
     }
 
     const onNextStep = () => {
@@ -74,7 +76,7 @@ export default ({ employees }) => {
                                             <ul id="progressbar">
                                                 <li className={step > 0 ? "active": ""} id="personal"><strong>Receiver</strong></li>
                                                 <li className={step > 1 ? "active": ""} id="money"><strong>Amount</strong></li>
-                                                <li className={step > 2 ? "active": ""} id="confirm"><strong>Finish</strong></li>
+                                                <li className={step > 2 ? "active": ""} id="confirm"><strong>Comfirmation</strong></li>
                                             </ul>                                    
                                             <fieldset style={{display: step === 1 ? "block" : "none"}}>
                                                 <div className="form-card">
@@ -125,26 +127,17 @@ export default ({ employees }) => {
                                                     <input type="button" name="previous" className="previous action-button-previous" value="Previous" onClick={onPreviousStep} />
                                                 </div>
                                             </fieldset>
-                                            <fieldset style={{display: step === 3 ? "block" : "none"}}>
-                                                <div className="form-card">
+                                            <fieldset style={{display: step === 3 ? "block" : "none"}}>                                                <div className="form-card">
                                                     <div className="row">
                                                         <div className="col-7">
-                                                            <p className="h5">Confirm</p>
+                                                            <p className="h5">Confirm your transfer</p>
                                                         </div>
                                                         <div className="col-5">
                                                             <p className="text-end h5 text-muted">Step 3 / 3</p>
                                                         </div>
                                                     </div>
-                                                    <div className="row justify-content-center my-2">
-                                                        <div className="col-3 text-center">
-                                                            <i className="fa fas fa-check" style={{fontSize: "64px", color: "#ad49fb"}}></i>                                                            
-                                                        </div>                                                        
-                                                    </div>
-                                                    <div className="row justify-content-center">
-                                                        <div className="col-12 text-center">
-                                                            <h5 className="purple-text text-center">Post your discussion!</h5>
-                                                        </div>
-                                                    </div>
+                                                    <p className="text-center my-2"><strong>Transfer to:</strong> {colleague.length ? colleague[0].name: ''}</p>
+                                                    <p className="text-center my-2"><strong>Transfer amount:</strong> {`+${amount} XABER`}</p>
                                                 </div>
                                                 <div style={{ padding: "16px" }}>
                                                     <input type="button" name="next" className="next action-button" value="Finish" onClick={onSubmitClicked} />

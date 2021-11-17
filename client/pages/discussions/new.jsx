@@ -90,6 +90,7 @@ export default () => {
         const discussionBoardContract = await getDiscussionBoardContract(gsnWeb3)
         await discussionBoardContract.methods.createDiscussion(title, description, library.utils.toWei((reward.toString()))).send({from: account})
 
+        window.location.assign('/')
     }
 
     const onNextStep = () => {

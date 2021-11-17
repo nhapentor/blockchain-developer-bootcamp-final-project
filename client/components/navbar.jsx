@@ -54,7 +54,8 @@ const Navbar = ({ employee }) => {
     try {
       deactivate()
       window.localStorage.removeItem('connectorIdv2')
-      //await updateEmployeeSignature(employee.id, '', 0)
+      await updateEmployeeSignature(employee.id, '', 0)
+      window.location.assign("/")
     } catch (ex) {
       console.log(ex)
     }
@@ -85,9 +86,8 @@ const Navbar = ({ employee }) => {
                   {`${profile.account.slice(0, 5)}...${profile.account.slice(-4)}`}
                 </a>
                 <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarScrollingDropdown">
-                  {/* <li><a className="dropdown-item" href="#">Action</a></li>
-                  <li><hr className="dropdown-divider" /></li> */}
-                  
+                  <li><a className="dropdown-item" href={`/employees/${account}/transfer`}>Transfer</a></li>
+                  <li><hr className="dropdown-divider" /></li>
                   <li><a onClick={() => disconnect()} className="dropdown-item">{t('Disconnect Wallet')}</a></li>
                 </ul>
               </li>

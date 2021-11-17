@@ -5,8 +5,9 @@ import { useWeb3React } from "@web3-react/core"
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { getRankByPoints, getNextRankByPoints } from '../../../lib/ranks'
-import { getEmployeesContract, getTokenContract } from '../../../lib/getContracts'
+import { getEmployeesContract, getTokenContract, getDiscussionBoardContract, getDiscussionContract } from '../../../lib/getContracts'
 import getGsnProvider from '../../../lib/getRelayProvider'
+import Link from 'next/link'
 
 const EmployeePage = ({ employee }) => {
 
@@ -29,16 +30,18 @@ const EmployeePage = ({ employee }) => {
 
     const [warnEmail, setWarnEmail] = useState(false)
 
-    useEffect(() => {
+    const [ discussionList, setDiscussionList ] = useState([])
+
+    useEffect(async () => {
         if (!active) {
             router.push(`/`)
         } else {
-            authenticate()
+            await authenticate()
         }
 
     }, [active])
 
-    const authenticate = () => {        
+    const authenticate = async () => {        
         if (employee && employee.account && employee.signature && employee.timestamp) {                    
             library.eth.personal.ecRecover(t('Message to be signed', { timestamp: employee.timestamp }), employee.signature)
             .then((acc) => {
@@ -46,6 +49,8 @@ const EmployeePage = ({ employee }) => {
                 getPoints()
             })                       
         } 
+
+        await getAllDiscussions()
     }
 
     const handleSignMessage = () => {
@@ -54,7 +59,7 @@ const EmployeePage = ({ employee }) => {
 
         library.eth.personal.sign(
           t('Message to be signed', { timestamp: now }), account,
-          (err, signature) => {
+          async (err, signature) => {
             if (!err) {
                 (async() => { 
                     await updateEmployeeSignature(employee.id, signature, now)                    
@@ -62,7 +67,7 @@ const EmployeePage = ({ employee }) => {
                     authenticate()
                 })()                
             } else {
-                console.log(err)
+                await console.log(err)
             }
           }
         )
@@ -120,6 +125,8 @@ const EmployeePage = ({ employee }) => {
         await updateEmployee(data)
         setUser({...user, name: employee.name, email: employee.email, avatar: {id: media.id, url: media.url}, isOnboarded: true, points: balance / 1e18 })
 
+        window.location.reload(false)
+
     }
 
     const validateEmail = (email) => {
@@ -154,6 +161,39 @@ const EmployeePage = ({ employee }) => {
             }
         }
     }, [onboardStep])
+
+    const getAllDiscussions = async () => {
+    
+        const tokenContract = await getTokenContract(library)
+        const discussionBoardContract = await getDiscussionBoardContract(library)
+        const allDiscussions = await discussionBoardContract.methods.getAllDiscussions().call({ from: account })
+
+        setDiscussionList([])
+    
+        allDiscussions.map(async (address, index) => {
+
+            const disscussionConstract = await getDiscussionContract(library, address)
+            const employeeContract = await getEmployeesContract(library) 
+
+            const ownerAddress = await disscussionConstract.methods.owner().call({ from: account })
+            const employee = await employeeContract.methods.employees(ownerAddress).call({ from: account })
+
+            const discusstion = {
+                index,
+                title: await disscussionConstract.methods.title().call({ from: account }),
+                description: await disscussionConstract.methods.description().call({ from: account }),
+                owner: employee.name || ownerAddress, 
+                reward: library.utils.fromWei(await tokenContract.methods.balanceOf(address).call({ from: account })),
+                replyCount: await disscussionConstract.methods.replyCount().call({ from: account }), 
+                address,
+                isClosed: await disscussionConstract.methods.isClosed().call({ from: account })
+            }
+
+            setDiscussionList( prev => [...prev, discusstion])
+        })
+
+    }
+
 
     return (
         <>
@@ -192,46 +232,40 @@ const EmployeePage = ({ employee }) => {
                                     <div className="row justify-content-center mt-3">
                                         <div className="col-6 bg-white p-0" style={{ borderRadius: "8px" }} >
                                             <div className="card">
-                                                <div className="card-header">Latest Events</div>
-                                                <div className="card-body">
-                                                    <div style={{ display: "flex" }}>
-                                                        <div style={{ width: "15%" }}>
-                                                            <img src="https://res.cloudinary.com/hy4kyit2a/f_auto,fl_lossy,q_70/learn/modules/apex_testing/2d3d525254af58a32f2325da207505ea_badge.png" width="100%" />
-                                                        </div>
-                                                        <div style={{ flexGrow: 1, paddingLeft: "1rem" }}>
-                                                            <h5 className="card-title">Lorem ipsum dolor sit amet</h5>
-                                                            <p className="card-text">un testo segnaposto utilizzato nel settore della tipografia e della stampa.</p>
-                                                            <p style={{ fontSize: "12px", fontWeight: "600" }}>+120 points</p>
-                                                            {/* <a href="#" className="btn btn-gra btn-sm w-150">Go somewhere</a> */}
-                                                        </div>
-                                                    </div>
+                                                <div className="card-header">
+                                                    <strong>Discussions</strong>
+                                                    <Link href={`/discussions/new`}>
+                                                        <a className="btn btn-gra btn-sm w-120 float-end">New</a>
+                                                    </Link>
                                                 </div>
-                                                <div className="card-body">
-                                                    <div style={{ display: "flex" }}>
-                                                        <div style={{ width: "15%" }}>
-                                                            <img src="https://res.cloudinary.com/hy4kyit2a/f_auto,fl_lossy,q_70/learn/modules/behavioral-triggers-in-journey-builder/5d4075dd3f70a1835b23acb1bb4e907c_badge.png" width="100%" />
-                                                        </div>
-                                                        <div style={{ flexGrow: 1, paddingLeft: "1rem" }}>
-                                                            <h5 className="card-title">Sed do eiusmod tempor incididunt</h5>
-                                                            <p className="card-text">Lorem Ipsum è considerato il testo segnaposto standard sin dal.</p>
-                                                            <p style={{ fontSize: "12px", fontWeight: "600" }}>+150 points</p>
-                                                            {/* <a href="#" className="btn btn-gra btn-sm w-150">Go somewhere</a> */}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="card-body">
-                                                    <div style={{ display: "flex" }}>
-                                                        <div style={{ width: "15%" }}>
-                                                            <img src="https://res.cloudinary.com/hy4kyit2a/f_auto,fl_lossy,q_70/learn/modules/accounts_contacts_lightning_experience/b84df67136a004253f0624ee68e0c9f2_badge.png" width="100%" />
-                                                        </div>
-                                                        <div style={{ flexGrow: 1, paddingLeft: "1rem" }}>
-                                                            <h5 className="card-title">At vero eos et accusamus et iusto odio</h5>
-                                                            <p className="card-text">Nam libero tempore, cum soluta nobis est eligendi optio cumque.</p>
-                                                            <p style={{ fontSize: "12px", fontWeight: "600" }}>+180 points</p>
-                                                            {/* <a href="#" className="btn btn-gra btn-sm w-150">Go somewhere</a> */}
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                {
+                                                    discussionList.length !== 0 ?
+                                                    discussionList.slice(0).reverse().map((d) => {
+
+                                                            return (
+                                                                <div key={`thread-${d.index}`} className="card-body" style={{borderBottom: `${d.index === 0 ? "0": "1px"} solid #ccc`}}>
+                                                                    <Link href={`/discussions/${d.address}`}>
+                                                                        <a className="card-title">{d.title}</a>
+                                                                    </Link>
+                                                                    <p className="card-text mt-2 mb-4">{d.description}</p>
+                                                                    <div>
+                                                                        <span className="badge bg-light text-dark">{`${d.replyCount} replies`}</span>
+                                                                        <span className="float-end" style={{ fontSize: "12px", fontWeight: "600" }}>{`${d.owner}`}</span>
+                                                                        { d.isClosed
+                                                                            ? <span className="badge bg-secondary mx-1">closed</span>
+                                                                            : <span className="badge bg-success mx-1">{`+${d.reward} XBR`}</span>
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                                )
+                                                            })
+                                                        :
+                                                        <>
+                                                            <div className="card-body">
+                                                                <p>No discussions....</p>
+                                                            </div>
+                                                        </>
+                                                }
                                             </div>
                                         </div>
                                     </div>
@@ -334,7 +368,7 @@ const EmployeePage = ({ employee }) => {
                                                             <img src={avatarImageSrc} style={{ height: "200px", objectFi: "contain" }} className={avatarImageSrc ? '': 'd-none'} />
                                                         </div> 
                                                     </div>
-                                                    <p className="text-center my-2"><strong>Name:</strong>{user.name}</p>
+                                                    <p className="text-center my-2"><strong>Name:</strong> {user.name}</p>
                                                     <p className="text-center my-2"><strong>Email:</strong> {user.email}</p>
                                                 </div>
                                                 <div style={{ padding: "16px" }}>
