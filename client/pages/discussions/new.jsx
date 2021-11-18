@@ -77,7 +77,7 @@ export default () => {
         const tokenContract = await getTokenContract(gsnWeb3)
 
         if (approveAmount > 0) {
-            await tokenContract.methods.approve(boardContract.options.address, library.utils.toWei((approveAmount).toString())).send({from: account})
+            await tokenContract.methods.approve(boardContract.options.address, library.utils.toWei((approveAmount).toString())).send({from: account, gasPrice: '20000000000' })
             setApproveAmount(0)
         }
 
@@ -88,7 +88,7 @@ export default () => {
 
         const gsnWeb3 = await getGsnProvider()        
         const discussionBoardContract = await getDiscussionBoardContract(gsnWeb3)
-        await discussionBoardContract.methods.createDiscussion(title, description, library.utils.toWei((reward.toString()))).send({from: account})
+        await discussionBoardContract.methods.createDiscussion(title, description, library.utils.toWei((reward.toString()))).send({from: account, gasPrice: '20000000000' })
 
         window.location.assign('/')
     }

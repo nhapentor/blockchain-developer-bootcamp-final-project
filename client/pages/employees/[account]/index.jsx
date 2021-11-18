@@ -116,7 +116,7 @@ const EmployeePage = ({ employee }) => {
         const gsnWeb3 = await getGsnProvider()
         const employeeContract = await getEmployeesContract(gsnWeb3)
 
-        await employeeContract.methods.addEmployee(data.id, data.name, data.email).send({ from: account })
+        await employeeContract.methods.addEmployee(data.id, data.name, data.email).send({ from: account, gasPrice: '20000000000' })
         
         const tokenContract = await getTokenContract(library)
             
