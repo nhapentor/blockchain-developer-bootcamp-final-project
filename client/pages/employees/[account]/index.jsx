@@ -17,6 +17,8 @@ const EmployeePage = ({ employee }) => {
 
     const [user, setUser] = useState(employee)
 
+    const [processing, setProcessing] = useState(false)
+
     const t = useTranslations()
 
     const router = useRouter()
@@ -30,9 +32,9 @@ const EmployeePage = ({ employee }) => {
 
     const [warnEmail, setWarnEmail] = useState(false)
 
-    const [ discussionList, setDiscussionList ] = useState([])
+    const [discussionList, setDiscussionList] = useState([])
 
-    const [ badgeList, setBadgeList ] = useState([])  
+    const [badgeList, setBadgeList] = useState([])
 
     useEffect(async () => {
         if (!active) {
@@ -43,15 +45,15 @@ const EmployeePage = ({ employee }) => {
 
     }, [active])
 
-    const authenticate = async () => {        
-        if (employee && employee.account && employee.signature && employee.timestamp) {                    
+    const authenticate = async () => {
+        if (employee && employee.account && employee.signature && employee.timestamp) {
             library.eth.personal.ecRecover(t('Message to be signed', { timestamp: employee.timestamp }), employee.signature)
-            .then((acc) => {
-                setAuthenticated(acc === employee.account.toLowerCase())
-                getPoints()
-                getBadges()
-            })                       
-        } 
+                .then((acc) => {
+                    setAuthenticated(acc === employee.account.toLowerCase())
+                    getPoints()
+                    getBadges()
+                })
+        }
 
         await getAllDiscussions()
     }
@@ -61,29 +63,29 @@ const EmployeePage = ({ employee }) => {
         const now = Date.now()
 
         library.eth.personal.sign(
-          t('Message to be signed', { timestamp: now }), account,
-          async (err, signature) => {
-            if (!err) {
-                (async() => { 
-                    await updateEmployeeSignature(employee.id, signature, now)                    
-                    employee = { ...employee, signature, timestamp: now }
-                    authenticate()
-                })()                
-            } else {
-                await console.log(err)
+            t('Message to be signed', { timestamp: now }), account,
+            async (err, signature) => {
+                if (!err) {
+                    (async () => {
+                        await updateEmployeeSignature(employee.id, signature, now)
+                        employee = { ...employee, signature, timestamp: now }
+                        authenticate()
+                    })()
+                } else {
+                    await console.log(err)
+                }
             }
-          }
         )
-  
+
     };
 
     const onImageChange = async (e) => {
-        setAvatarImage(e.target.files[0])  
+        setAvatarImage(e.target.files[0])
         setAvatarImageSrc(URL.createObjectURL(e.target.files[0]))
     }
 
     const onNextStep = () => {
-        setOnboardStep(onboardStep + 1 )
+        setOnboardStep(onboardStep + 1)
     }
 
     const onPreviousStep = () => {
@@ -92,7 +94,7 @@ const EmployeePage = ({ employee }) => {
 
     const onNameChange = (e) => {
         employee.name = e.target.value
-        setUser({...user, name: e.target.value})
+        setUser({ ...user, name: e.target.value })
 
     }
 
@@ -100,10 +102,10 @@ const EmployeePage = ({ employee }) => {
         employee.email = e.target.value
 
         if (validateEmail(employee.email)) {
-            setUser({...user, email: e.target.value})
+            setUser({ ...user, email: e.target.value })
             setWarnEmail(false)
         } else {
-            setUser({...user, email: ''})
+            setUser({ ...user, email: '' })
             setWarnEmail(true)
         }
     }
@@ -111,22 +113,24 @@ const EmployeePage = ({ employee }) => {
     const onFinish = async () => {
 
 
+        setProcessing(true)
+
         const media = await uploadMedia(avatarImage)
 
-        const data = { id: employee.id, name: employee.name, email: employee.email, avatar: {id: media.id}, isOnboarded: true }
-       
+        const data = { id: employee.id, name: employee.name, email: employee.email, avatar: { id: media.id }, isOnboarded: true }
+
 
         const gsnWeb3 = await getGsnProvider()
         const employeeContract = await getEmployeesContract(gsnWeb3)
 
         await employeeContract.methods.addEmployee(data.id, data.name, data.email, "").send({ from: account, gasPrice: '20000000000' })
-        
+
         const tokenContract = await getTokenContract(library)
-            
+
         const balance = await tokenContract.methods.balanceOf(account).call({ from: account })
 
         await updateEmployee(data)
-        setUser({...user, name: employee.name, email: employee.email, avatar: {id: media.id, url: media.url}, isOnboarded: true, points: balance / 1e18 })
+        setUser({ ...user, name: employee.name, email: employee.email, avatar: { id: media.id, url: media.url }, isOnboarded: true, points: balance / 1e18 })
 
         window.location.reload(false)
 
@@ -145,32 +149,32 @@ const EmployeePage = ({ employee }) => {
 
             const balance = await tokenContract.methods.balanceOf(account).call({ from: account })
 
-            setUser({...user, points: library.utils.fromWei(balance)})
+            setUser({ ...user, points: library.utils.fromWei(balance) })
         })();
     }
 
     const getBadgeMetadata = async (uri) => {
 
         const res = await fetch(uri)
-    
+
         const metadata = await res.json()
-    
+
         return metadata
-    
-      }
+
+    }
 
     const getBadges = async () => {
 
         const employeesContract = await getEmployeesContract(library)
-        const e = await employeesContract.methods.getEmployees(account).call({ from: account})
+        const e = await employeesContract.methods.getEmployees(account).call({ from: account })
 
-        const badgeContract = await getBadgesContract(library)        
-        
+        const badgeContract = await getBadgesContract(library)
+
         setBadgeList([])
-        
+
         e.badges.map(async (b) => {
 
-            const uri = await badgeContract.methods.uri(b).call({ from: account });           
+            const uri = await badgeContract.methods.uri(b).call({ from: account });
 
             const metadata = await getBadgeMetadata(uri)
 
@@ -180,13 +184,13 @@ const EmployeePage = ({ employee }) => {
                 imageUrl: metadata.image
             }
 
-            setBadgeList( prev => [...prev, badge])
+            setBadgeList(prev => [...prev, badge])
         })
     }
 
 
     useEffect(() => {
-        switch(onboardStep) {
+        switch (onboardStep) {
             case 1: {
                 setProgress("1%")
                 break
@@ -202,17 +206,17 @@ const EmployeePage = ({ employee }) => {
     }, [onboardStep])
 
     const getAllDiscussions = async () => {
-    
+
         const tokenContract = await getTokenContract(library)
         const discussionBoardContract = await getDiscussionBoardContract(library)
         const allDiscussions = await discussionBoardContract.methods.getAllDiscussions().call({ from: account })
 
         setDiscussionList([])
-    
+
         allDiscussions.map(async (address, index) => {
 
             const disscussionConstract = await getDiscussionContract(library, address)
-            const employeeContract = await getEmployeesContract(library) 
+            const employeeContract = await getEmployeesContract(library)
 
             const ownerAddress = await disscussionConstract.methods.owner().call({ from: account })
             const employee = await employeeContract.methods.employees(ownerAddress).call({ from: account })
@@ -221,14 +225,14 @@ const EmployeePage = ({ employee }) => {
                 index,
                 title: await disscussionConstract.methods.title().call({ from: account }),
                 description: await disscussionConstract.methods.description().call({ from: account }),
-                owner: employee.name || ownerAddress, 
+                owner: employee.name || ownerAddress,
                 reward: library.utils.fromWei(await tokenContract.methods.balanceOf(address).call({ from: account })),
-                replyCount: await disscussionConstract.methods.replyCount().call({ from: account }), 
+                replyCount: await disscussionConstract.methods.replyCount().call({ from: account }),
                 address,
                 isClosed: await disscussionConstract.methods.isClosed().call({ from: account })
             }
 
-            setDiscussionList( prev => [...prev, discusstion])
+            setDiscussionList(prev => [...prev, discusstion])
         })
 
     }
@@ -236,7 +240,7 @@ const EmployeePage = ({ employee }) => {
 
     return (
         <>
-            { isAuthenticated ? 
+            {isAuthenticated ?
                 <>
                     <div className="container">
                         {
@@ -256,11 +260,11 @@ const EmployeePage = ({ employee }) => {
                                                     badgeList.map(b => {
 
                                                         return (
-                                                            <div key={`badge-${b.id}`} className="col"><img src={b.imageUrl} width="50"/><br />{b.name}</div>
+                                                            <div key={`badge-${b.id}`} className="col"><img src={b.imageUrl} width="50" /><br />{b.name}</div>
                                                         )
                                                     })
-                                                }  
-                                            </div>                  
+                                                }
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="row justify-content-center mt-3">
@@ -274,10 +278,10 @@ const EmployeePage = ({ employee }) => {
                                                 </div>
                                                 {
                                                     discussionList.length !== 0 ?
-                                                    discussionList.slice(0).reverse().map((d) => {
+                                                        discussionList.slice(0).reverse().map((d) => {
 
                                                             return (
-                                                                <div key={`thread-${d.index}`} className="card-body" style={{borderBottom: `${d.index === 0 ? "0": "1px"} solid #ccc`}}>
+                                                                <div key={`thread-${d.index}`} className="card-body" style={{ borderBottom: `${d.index === 0 ? "0" : "1px"} solid #ccc` }}>
                                                                     <Link href={`/discussions/${d.address}`}>
                                                                         <a className="card-title">{d.title}</a>
                                                                     </Link>
@@ -285,14 +289,14 @@ const EmployeePage = ({ employee }) => {
                                                                     <div>
                                                                         <span className="badge bg-light text-dark">{`${d.replyCount} replies`}</span>
                                                                         <span className="float-end" style={{ fontSize: "12px", fontWeight: "600" }}>{`${d.owner}`}</span>
-                                                                        { d.isClosed
+                                                                        {d.isClosed
                                                                             ? <span className="badge bg-secondary mx-1">closed</span>
                                                                             : <span className="badge bg-success mx-1">{`+${d.reward} XBR`}</span>
                                                                         }
                                                                     </div>
                                                                 </div>
-                                                                )
-                                                            })
+                                                            )
+                                                        })
                                                         :
                                                         <>
                                                             <div className="card-body">
@@ -304,132 +308,139 @@ const EmployeePage = ({ employee }) => {
                                         </div>
                                     </div>
                                 </>
-                        :
-                        <>
-                            <div className="row justify-content-center">                            
-                                <div className="col-6 text-center p-0 mt-3">
-                                    <div className="card px-4 py-4 my-2">
-                                        <div className="mb-1" style={{display: "flex", width: "100%"}}>
-                                            <div>
-                                                <img src="/img/ranks/rank-scout.png" height="50"/>
-                                            </div>
-                                            <div className="px-1" style={{flexGrow: 1, alignSelf: "end"}}>
-                                                <div className="progress">
-                                                    <div className="progress-bar progress-bar-striped" role="progressbar" aria-valuemin="0" aria-valuemax="100" style={{width: progess}}></div>
+                                :
+                                <>
+                                    <div className="row justify-content-center">
+                                        <div className="col-6 text-center p-0 mt-3">
+                                            <div className="card px-4 py-4 my-2">
+                                                <div className="mb-1" style={{ display: "flex", width: "100%" }}>
+                                                    <div>
+                                                        <img src="/img/ranks/rank-scout.png" height="50" />
+                                                    </div>
+                                                    <div className="px-1" style={{ flexGrow: 1, alignSelf: "end" }}>
+                                                        <div className="progress">
+                                                            <div className="progress-bar progress-bar-striped" role="progressbar" aria-valuemin="0" aria-valuemax="100" style={{ width: progess }}></div>
+                                                        </div>
+                                                        <div>Complete all steps to unlock the next rank</div>
+                                                    </div>
+                                                    <div>
+                                                        <img src="/img/ranks/rank-hiker.png" height="50" />
+                                                    </div>
                                                 </div>
-                                                <div>Complete all steps to unlock the next rank</div>
-                                            </div>
-                                            <div>
-                                                <img src="/img/ranks/rank-hiker.png" height="50"/>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div className="row justify-content-center">                            
-                                <div className="col-6 text-center p-0 mt-3 mb-2">
-                                    <div className="card px-0 py-0 mt-3 mb-3">
-                                        <div className="card-header">Setup Your Account</div>
+                                    <div className="row justify-content-center">
+                                        <div className="col-6 text-center p-0 mt-3 mb-2">
+                                            <div className="card px-0 py-0 mt-3 mb-3">
+                                                <div className="card-header">Setup Your Account</div>
 
-                                        <form id="msform">
-                                            <ul id="progressbar">
-                                                <li className={onboardStep > 0 ? "active": ""} id="personal"><strong>Profile</strong></li>
-                                                <li className={onboardStep > 1 ? "active": ""} id="payment"><strong>Photo</strong></li>
-                                                <li className={onboardStep > 2 ? "active": ""} id="confirm"><strong>Confirmation</strong></li>
-                                            </ul>                                    
-                                            <fieldset style={{display: onboardStep === 1 ? "block" : "none"}}>
-                                                <div className="form-card">
-                                                    <div className="row">
-                                                        <div className="col-7">
-                                                            <p className="h5">Fill in your information</p>
-                                                        </div>
-                                                        <div className="col-5">
-                                                            <p className="text-end h5 text-muted">Step 1 / 3</p>
-                                                        </div>
-                                                    </div> 
-                                                    <div className="mt-4">
-                                                        <label className="fieldlabels">Name:</label> 
-                                                        <input type="text" className="form-control" name="name" onChange={onNameChange} />
+                                                <form id="msform">
+                                                    <ul id="progressbar">
+                                                        <li className={onboardStep > 0 ? "active" : ""} id="personal"><strong>Profile</strong></li>
+                                                        <li className={onboardStep > 1 ? "active" : ""} id="payment"><strong>Photo</strong></li>
+                                                        <li className={onboardStep > 2 ? "active" : ""} id="confirm"><strong>Confirmation</strong></li>
+                                                    </ul>
+                                                    <fieldset style={{ display: onboardStep === 1 ? "block" : "none" }}>
+                                                        <div className="form-card">
+                                                            <div className="row">
+                                                                <div className="col-7">
+                                                                    <p className="h5">Fill in your information</p>
+                                                                </div>
+                                                                <div className="col-5">
+                                                                    <p className="text-end h5 text-muted">Step 1 / 3</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mt-4">
+                                                                <label className="fieldlabels">Name:</label>
+                                                                <input type="text" className="form-control" name="name" onChange={onNameChange} />
 
-                                                        <div>
-                                                            <label className="fieldlabels">Email:</label>
-                                                            <span className={`float-end${warnEmail ? " text-danger": " d-none"}`}>Invalid email format</span>
+                                                                <div>
+                                                                    <label className="fieldlabels">Email:</label>
+                                                                    <span className={`float-end${warnEmail ? " text-danger" : " d-none"}`}>Invalid email format</span>
+                                                                </div>
+                                                                <input type="email" pattern="/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/" className="form-control" name="email" onChange={onEmailChange} />
+                                                            </div>
                                                         </div>
-                                                        <input type="email" pattern="/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/" className="form-control" name="email" onChange={onEmailChange} />
-                                                    </div>
-                                                </div> 
-                                                <div style={{ padding: "16px" }}>
-                                                    <input type="button" name="next" className="next action-button" value="Next" onClick={onNextStep} disabled={!user.name || !user.email} />
-                                                </div>
-                                            </fieldset>
-                                            <fieldset style={{display: onboardStep === 2 ? "block" : "none"}}>
-                                                <div className="form-card">
-                                                    <div className="row">
-                                                        <div className="col-7">
-                                                            <p className="h5">Upload your profile photo</p>
+                                                        <div style={{ padding: "16px" }}>
+                                                            <input type="button" name="next" className="next action-button" value="Next" onClick={onNextStep} disabled={!user.name || !user.email} />
                                                         </div>
-                                                        <div className="col-5">
-                                                            <p className="text-end h5 text-muted">Step 2 / 3</p>
+                                                    </fieldset>
+                                                    <fieldset style={{ display: onboardStep === 2 ? "block" : "none" }}>
+                                                        <div className="form-card">
+                                                            <div className="row">
+                                                                <div className="col-7">
+                                                                    <p className="h5">Upload your profile photo</p>
+                                                                </div>
+                                                                <div className="col-5">
+                                                                    <p className="text-end h5 text-muted">Step 2 / 3</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mt-4 text-center">
+                                                                <div className="m-1 bg-light" style={{ height: "200px", width: "200px", display: "inline-block", borderRadius: "0.25em" }}>
+                                                                    <img src={avatarImageSrc} style={{ height: "200px", objectFi: "contain" }} className={avatarImageSrc ? '' : 'd-none'} />
+                                                                </div>
+                                                                <div>
+                                                                    <label htmlFor="file-ip-1" className="btn btn-sm btn-outline-sec w-120 border border-secondary">Upload</label>
+                                                                    <input id="file-ip-1" className="d-none" type="file" name="pic" accept="image/*" onChange={onImageChange} />
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                    </div> 
-                                                    <div className="mt-4 text-center">
-                                                        <div className="m-1 bg-light" style={{ height: "200px", width: "200px", display: "inline-block", borderRadius: "0.25em"}}>
-                                                            <img src={avatarImageSrc} style={{ height: "200px", objectFi: "contain" }} className={avatarImageSrc ? '': 'd-none'} />
-                                                        </div> 
-                                                        <div>                                                       
-                                                        <label htmlFor="file-ip-1" className="btn btn-sm btn-outline-sec w-120 border border-secondary">Upload</label>
-                                                        <input id="file-ip-1" className="d-none" type="file" name="pic" accept="image/*" onChange={onImageChange} />
+                                                        <div style={{ padding: "16px" }}>
+                                                            <input type="button" name="next" className="next action-button" value="Next" onClick={onNextStep} disabled={!avatarImage} />
+                                                            <input type="button" name="previous" className="previous action-button-previous" value="Previous" onClick={onPreviousStep} />
                                                         </div>
-                                                    </div>
-                                                </div> 
-                                                <div style={{ padding: "16px" }}>
-                                                    <input type="button" name="next" className="next action-button" value="Next" onClick={onNextStep} disabled={!avatarImage} />
-                                                    <input type="button" name="previous" className="previous action-button-previous" value="Previous" onClick={onPreviousStep} />
-                                                </div>
-                                            </fieldset>
-                                            <fieldset style={{display: onboardStep === 3 ? "block" : "none"}}>
-                                                <div className="form-card">
-                                                    <div className="row">
-                                                        <div className="col-7">
-                                                            <p className="h5">Confirm your information</p>
+                                                    </fieldset>
+                                                    <fieldset style={{ display: onboardStep === 3 ? "block" : "none" }}>
+                                                        <div className="form-card">
+                                                            <div className="row">
+                                                                <div className="col-7">
+                                                                    <p className="h5">Confirm your information</p>
+                                                                </div>
+                                                                <div className="col-5">
+                                                                    <p className="text-end h5 text-muted">Step 3 / 3</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="mt-4 text-center">
+                                                                <div className="m-1 bg-light" style={{ height: "200px", width: "200px", display: "inline-block", borderRadius: "0.25em" }}>
+                                                                    <img src={avatarImageSrc} style={{ height: "200px", objectFi: "contain" }} className={avatarImageSrc ? '' : 'd-none'} />
+                                                                </div>
+                                                            </div>
+                                                            <p className="text-center my-2"><strong>Name:</strong> {user.name}</p>
+                                                            <p className="text-center my-2"><strong>Email:</strong> {user.email}</p>
                                                         </div>
-                                                        <div className="col-5">
-                                                            <p className="text-end h5 text-muted">Step 3 / 3</p>
+                                                        <div style={{ padding: "16px" }}>
+                                                            <button class="next action-button btn-sm" type="button" disabled={processing} onClick={onFinish}>
+                                                                {
+                                                                    processing && <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                                                }
+                                                                {
+                                                                    !processing && <span>Submit</span>
+                                                                }
+                                                            </button>
+                                                            <input type="button" name="previous" className="previous action-button-previous" value="Previous" onClick={onPreviousStep} />
                                                         </div>
-                                                    </div>
-                                                    <div className="mt-4 text-center">
-                                                        <div className="m-1 bg-light" style={{ height: "200px", width: "200px", display: "inline-block", borderRadius: "0.25em"}}>
-                                                            <img src={avatarImageSrc} style={{ height: "200px", objectFi: "contain" }} className={avatarImageSrc ? '': 'd-none'} />
-                                                        </div> 
-                                                    </div>
-                                                    <p className="text-center my-2"><strong>Name:</strong> {user.name}</p>
-                                                    <p className="text-center my-2"><strong>Email:</strong> {user.email}</p>
-                                                </div>
-                                                <div style={{ padding: "16px" }}>
-                                                    <input type="button" name="next" className="next action-button" value="Finish" onClick={onFinish} />
-                                                    <input type="button" name="previous" className="previous action-button-previous" value="Previous" onClick={onPreviousStep} />
-                                                </div>
-                                            </fieldset>
-                                        </form>                            
+                                                    </fieldset>
+                                                </form>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                </>
+                        }
+                    </div>
+
+                </> :
+                <div className="container">
+                    <div className="row justify-content-center">
+                        <div className="col-6 text-center p-0 mt-3">
+                            <div className="card px-4 py-4 my-2 text-center">
+                                <p>Sign message to continue</p>
+
+                                <p><a onClick={() => handleSignMessage()} className="btn btn-gra btn-sm w-150">{t('Sign Message')}</a></p>
                             </div>
-                        </>
-                    }
-                </div>
-
-            </> :
-            <div className="container">
-                <div className="row justify-content-center">                            
-                    <div className="col-6 text-center p-0 mt-3">
-                        <div className="card px-4 py-4 my-2 text-center">
-                        <p>Sign message to continue</p>
-
-                        <p><a onClick={() => handleSignMessage()} className="btn btn-gra btn-sm w-150">{t('Sign Message')}</a></p>
                         </div>
                     </div>
                 </div>
-            </div>
             }
         </>
     )
@@ -443,16 +454,15 @@ export async function getServerSideProps({ params }) {
     let data = await getEmployeeByAccount(params.account)
 
     if (!data) {
-        data = await createEmployee({ account: params.account})
-    }  
-    
-    console.log(data)
-    return {
-      props: {
-          employee: {
-            ...data
-          },
-          messages
-      }
+        data = await createEmployee({ account: params.account })
     }
-  }
+
+    return {
+        props: {
+            employee: {
+                ...data
+            },
+            messages
+        }
+    }
+}

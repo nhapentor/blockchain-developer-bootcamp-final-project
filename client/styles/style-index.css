@@ -75,6 +75,7 @@ body, nav, .font-primary{
 }
 
 #msform input,
+#msform button,
 #msform textarea {
     padding: 8px 15px 8px 15px;
     border: 1px solid #ccc;
