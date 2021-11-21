@@ -1,4 +1,5 @@
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 import { useWeb3React } from "@web3-react/core"
 import { injected } from "./wallet/connectors"
@@ -8,6 +9,7 @@ import { getTokenContract } from '../lib/getContracts';
 const Navbar = ({ employee }) => {
 
   const t = useTranslations()
+  const router = useRouter()
 
   const { active, account, library, activate, deactivate } = useWeb3React()
 
@@ -55,7 +57,7 @@ const Navbar = ({ employee }) => {
       deactivate()
       window.localStorage.removeItem('connectorIdv2')
       await updateEmployeeSignature(employee.id, '', 0)
-      window.location.assign("/")
+      router.push("/")
     } catch (ex) {
       console.log(ex)
     }

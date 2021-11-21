@@ -5,7 +5,7 @@ async function fetchAPI(query, { variables } = {}) {
     //   variables,
     // })
     // console.log(body)
-    const res = await fetch(`http://localhost:1338/graphql`, {
+    const res = await fetch(`http://18.142.159.88:1337/graphql`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -228,7 +228,7 @@ async function fetchAPI(query, { variables } = {}) {
     const formData = new FormData();
     formData.append('files', image)
 
-    const res = await fetch(`http://localhost:1338/upload`, {
+    const res = await fetch(`http://18.142.159.88:1337/upload`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json'

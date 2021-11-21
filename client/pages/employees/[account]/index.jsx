@@ -244,7 +244,7 @@ const EmployeePage = ({ employee }) => {
                                 <>
                                     <div className="row justify-content-center mt-3">
                                         <div className="col-2 h-150 pr-0 img-cover" style={{ borderRadius: "8px 0px 0px 8px" }}>
-                                            <img src={`http://localhost:1338${user.avatar.url}`} className="img-fluid center" style={{ maxWidth: "100%", height: "auto" }} alt="user" />
+                                            <img src={`http://18.142.159.88:1337${user.avatar.url}`} className="img-fluid center" style={{ maxWidth: "100%", height: "auto" }} alt="user" />
                                         </div>
                                         <div className="col-6 bg-white p-4">
                                             <h3 className="text-w-600">{user.name}</h3>
@@ -256,7 +256,7 @@ const EmployeePage = ({ employee }) => {
                                                     badgeList.map(b => {
 
                                                         return (
-                                                            <div key={`badge-${b.id}`} className="col"><img src={getRankByPoints(user.points).imageUrl} width="50"/><br />{b.name}</div>
+                                                            <div key={`badge-${b.id}`} className="col"><img src={b.imageUrl} width="50"/><br />{b.name}</div>
                                                         )
                                                     })
                                                 }  
@@ -446,6 +446,7 @@ export async function getServerSideProps({ params }) {
         data = await createEmployee({ account: params.account})
     }  
     
+    console.log(data)
     return {
       props: {
           employee: {
