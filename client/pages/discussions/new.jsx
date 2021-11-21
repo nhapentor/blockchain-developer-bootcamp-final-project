@@ -1,8 +1,8 @@
-import { useState, useEffect} from 'react';
-import { useWeb3React } from '@web3-react/core';
-
+import { useState, useEffect} from 'react'
+import { useWeb3React } from '@web3-react/core'
 import getGsnProvider from '../../lib/getRelayProvider'
-import { getTokenContract, getDiscussionContract, getDiscussionBoardContract } from '../../lib/getContracts';
+import { getTokenContract, getDiscussionBoardContract } from '../../lib/getContracts'
+import UserProfile from '../../components/userProfile'
 
 export default () => {
 
@@ -105,6 +105,7 @@ export default () => {
         <>
         <div className="container">
         {active && <>
+                    <UserProfile />
                     <div className="row justify-content-center">                            
                                 <div className="col-6 text-center p-0 mt-3 mb-2">
                                     <div className="card px-0 py-0 mt-3 mb-3">

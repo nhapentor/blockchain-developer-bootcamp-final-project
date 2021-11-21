@@ -14,8 +14,6 @@ const Navbar = ({ employee }) => {
   const { active, account, library, activate, deactivate } = useWeb3React()
 
   const [ profile, setProfile ]  = useState({
-    tokenName: '',
-    tokenAmount: 0,
     account: '',
     employeeId: 0
   })
@@ -31,22 +29,18 @@ const Navbar = ({ employee }) => {
   useEffect(async () => {
 
     if (isActive) {
-      const token = await getTokenContract(library)
-      const tokenName = await token.methods.name().call({from: account})
-      const tokenAmount = await token.methods.balanceOf(account).call({from: account})
+
       let employeeId = employee ? employee.id : 0
 
       if (!employeeId) {
         const employeesContract = await getEmployeesContract(library)
         const e = await employeesContract.methods.getEmployees(account).call({ from: account })        
         employeeId = e.id
-      }
+      }      
   
       setProfile({
-        account,
-        tokenName,
-        employeeId,
-        tokenAmount: library.utils.fromWei(tokenAmount)
+        account,      
+        employeeId        
       })
     }
 
@@ -86,9 +80,6 @@ const Navbar = ({ employee }) => {
             {!isActive && <a onClick={() => connect()} className="btn btn-gra btn-sm w-150">{t('Connect Wallet')}</a> }
             { isActive && 
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-              <li className="nav-item">
-                <span className="nav-link active">{`${profile.tokenName}: +${profile.tokenAmount}`}</span>
-              </li>
               <li className="nav-item dropdown">
                 <a 
                 className="nav-link dropdown-toggle badge rounded-pill bg-light text-dark" 
@@ -98,6 +89,7 @@ const Navbar = ({ employee }) => {
                 </a>
                 <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarScrollingDropdown">
                   <li><a className="dropdown-item" href={`/employees/${account}/transfer`}>Transfer</a></li>
+                  <li><a className="dropdown-item" href={`/redemption`}>Redeem Badges</a></li>
                   <li><hr className="dropdown-divider" /></li>
                   <li><a onClick={() => disconnect()} className="dropdown-item">{t('Disconnect Wallet')}</a></li>
                 </ul>

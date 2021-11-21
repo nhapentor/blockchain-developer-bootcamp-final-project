@@ -2,6 +2,7 @@ import { useRouter } from 'next/router'
 import { useWeb3React } from "@web3-react/core"
 import getGsnProvider from '../../lib/getRelayProvider'
 import { useEffect, useState } from 'react';
+import UserProfile from '../../components/userProfile';
 
 import { 
   getTokenContract, 
@@ -114,6 +115,7 @@ export default () => {
 
   return (<>
 
+    <UserProfile />
     <div className="row justify-content-center mt-3">
       <div className="col-6 bg-white p-0" style={{ borderRadius: "8px" }} >
         <div className="card">

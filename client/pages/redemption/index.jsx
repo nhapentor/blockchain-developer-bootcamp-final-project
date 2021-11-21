@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useWeb3React } from "@web3-react/core"
-
+import UserProfile from '../../components/userProfile'
 import getGsnProvider from '../../lib/getRelayProvider'
 import { 
     getTokenContract, 
@@ -99,46 +99,48 @@ export default () => {
 
   return (    
       <div className="container">
-          {active &&
+          {active && <>
+              <UserProfile />
               <div className="row justify-content-center mt-3">
                   <div className="col-6 bg-white p-0" style={{ borderRadius: "8px" }} >
-                          {
-                            badgeList.length !== 0 &&
-                            <>
-                                {
-                                    badgeList.map((b) => {                                
-                                        return (
-                                            <div key={`thread-${b.id}`} className="card">
-                                                <img src={b.imageUrl} className="card-img-top" style={{height: "80px", width: "auto"}} />
-                                                <div className="card-body">
-                                                    <h5 className="card-title">{b.name}</h5>
-                                                    <p className="card-text">{b.exchangeRate}</p>  
-                                                    {
-                                                        balance >= Number(b.exchangeRate) && (
-                                                        <>
-                                                        {
-                                                            allowance < Number(b.exchangeRate) && (<button className="btn btn-sm btn-outline-sec" onClick={() => onApproveAmountClicked(b.exchangeRate)}>Approve</button>)
-                                                        }
-                                                        {
-                                                            <button className="btn btn-sm btn-gra" disabled={ balance < Number(b.exchangeRate) || allowance < Number(b.exchangeRate) } onClick={() => onRedeemClicked(b.id)}>Redeem</button>                                                        
-                                                        }
-                                                        </>)
-                                                    }
-                                                    {
-                                                        balance < Number(b.exchangeRate) && 
-                                                        <>
-                                                        <p>Insufficient points!</p>
-                                                        </>
-                                                    }
-                                                </div>
-                                            </div>                                                
-                                        )
-                                    })
-                                }
-                            </>
-                          }
-                      </div>
+                      {
+                          badgeList.length !== 0 &&
+                          <>
+                              {
+                                  badgeList.map((b) => {
+                                      return (
+                                          <div key={`thread-${b.id}`} className="card">
+                                              <img src={b.imageUrl} className="card-img-top" style={{ height: "80px", width: "auto" }} />
+                                              <div className="card-body">
+                                                  <h5 className="card-title">{b.name}</h5>
+                                                  <p className="card-text">{b.exchangeRate}</p>
+                                                  {
+                                                      balance >= Number(b.exchangeRate) && (
+                                                          <>
+                                                              {
+                                                                  allowance < Number(b.exchangeRate) && (<button className="btn btn-sm btn-outline-sec" onClick={() => onApproveAmountClicked(b.exchangeRate)}>Approve</button>)
+                                                              }
+                                                              {
+                                                                  <button className="btn btn-sm btn-gra" disabled={balance < Number(b.exchangeRate) || allowance < Number(b.exchangeRate)} onClick={() => onRedeemClicked(b.id)}>Redeem</button>
+                                                              }
+                                                          </>)
+                                                  }
+                                                  {
+                                                      balance < Number(b.exchangeRate) &&
+                                                      <>
+                                                          <p>Insufficient points!</p>
+                                                      </>
+                                                  }
+                                              </div>
+                                          </div>
+                                      )
+                                  })
+                              }
+                          </>
+                      }
                   </div>
+              </div>
+          </>
           }
       </div>
   )

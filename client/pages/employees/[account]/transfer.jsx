@@ -4,6 +4,7 @@ import { Typeahead } from 'react-bootstrap-typeahead'
 import getGsnProvider from '../../../lib/getRelayProvider'
 import { getTokenContract } from '../../../lib/getContracts';
 import { getAllEmployees } from '../../../lib/api'
+import UserProfile from '../../../components/userProfile'
 
 export default ({ employees }) => {
 
@@ -67,6 +68,7 @@ export default ({ employees }) => {
         <>
         <div className="container">
         {active && <>
+                    <UserProfile />
                     <div className="row justify-content-center">                            
                                 <div className="col-6 text-center p-0 mt-3 mb-2">
                                     <div className="card px-0 py-0 mt-3 mb-3">

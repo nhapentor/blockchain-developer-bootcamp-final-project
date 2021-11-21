@@ -4,9 +4,10 @@ import { useTranslations } from 'next-intl'
 import { useWeb3React } from "@web3-react/core"
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { getEmployeesContract, getTokenContract, getDiscussionBoardContract, getDiscussionContract, getBadgesContract } from '../../../lib/getContracts'
+import { getEmployeesContract, getTokenContract, getDiscussionBoardContract, getDiscussionContract } from '../../../lib/getContracts'
 import getGsnProvider from '../../../lib/getRelayProvider'
 import Link from 'next/link'
+import UserProfile from '../../../components/userProfile'
 
 const EmployeePage = ({ employee }) => {
 
@@ -34,7 +35,6 @@ const EmployeePage = ({ employee }) => {
 
     const [discussionList, setDiscussionList] = useState([])
 
-    const [badgeList, setBadgeList] = useState([])
 
     useEffect(async () => {
         if (!active) {
@@ -58,8 +58,6 @@ const EmployeePage = ({ employee }) => {
             library.eth.personal.ecRecover(t('Message to be signed', { timestamp: employee.timestamp }), employee.signature)
                 .then((acc) => {
                     (async () => {                        
-                        await getBalance()
-                        await getBadges()
                         await getEmployee()
                         await getAllDiscussions()
                         setPageLoading(false)
@@ -151,47 +149,6 @@ const EmployeePage = ({ employee }) => {
         return re.test(String(email).toLowerCase());
     }
 
-    const getBalance = async () => {           
-        const tokenContract = await getTokenContract(library)
-        const balance = await tokenContract.methods.balanceOf(account).call({ from: account })
-        setUser({ ...user, points: library.utils.fromWei(balance) })
-    }
-
-    const getBadgeMetadata = async (uri) => {
-
-        const res = await fetch(uri)
-
-        const metadata = await res.json()
-
-        return metadata
-
-    }
-
-    const getBadges = async () => {
-
-        const employeesContract = await getEmployeesContract(library)
-        const e = await employeesContract.methods.getEmployees(account).call({ from: account })
-
-        const badgeContract = await getBadgesContract(library)
-
-        setBadgeList([])
-
-        e.badges.map(async (b) => {
-
-            const uri = await badgeContract.methods.uri(b).call({ from: account });
-
-            const metadata = await getBadgeMetadata(uri)
-
-            const badge = {
-                id: metadata.id,
-                name: metadata.name,
-                imageUrl: metadata.image
-            }
-
-            setBadgeList(prev => [...prev, badge])
-        })
-    }
-
     const getEmployee = async () => {
 
         const employeesContract = await getEmployeesContract(library)
@@ -263,27 +220,7 @@ const EmployeePage = ({ employee }) => {
                         {
                             user.isOnboarded ?
                                 <>
-                                    <div className="row justify-content-center mt-3">
-                                        <div className="col-2 h-150 pr-0 img-cover" style={{ borderRadius: "8px 0px 0px 8px" }}>
-                                            <img src={`${user.image}`} className="img-fluid center" style={{ maxWidth: "100%", height: "auto" }} alt="user" />
-                                        </div>
-                                        <div className="col-6 bg-white p-4">
-                                            <h3 className="text-w-600">{user.name}</h3>
-                                            <p>{user.email}</p>
-                                        </div>
-                                        <div className="col-4 pr-0 py-1 bg-white text-center" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                                            <div className="row">
-                                                {
-                                                    badgeList.map(b => {
-
-                                                        return (
-                                                            <div key={`badge-${b.id}`} className="col"><img src={b.imageUrl} width="50" /><br />{b.name}</div>
-                                                        )
-                                                    })
-                                                }
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <UserProfile />
                                     <div className="row justify-content-center mt-3">
                                         <div className="col-6 bg-white p-0" style={{ borderRadius: "8px" }} >
                                             <div className="card">
