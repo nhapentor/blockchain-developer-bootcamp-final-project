@@ -1,4 +1,4 @@
-const path = require("path");
+// const path = require("path");
 const HDWalletProvider = require("truffle-hdwallet-provider");
 
 require('dotenv').config()

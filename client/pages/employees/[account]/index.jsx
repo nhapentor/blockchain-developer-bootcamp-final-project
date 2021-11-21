@@ -256,7 +256,7 @@ const EmployeePage = ({ employee }) => {
                                                     badgeList.map(b => {
 
                                                         return (
-                                                            <div className="col"><img src={getRankByPoints(user.points).imageUrl} width="50"/><br />{b.name}</div>
+                                                            <div key={`badge-${b.id}`} className="col"><img src={getRankByPoints(user.points).imageUrl} width="50"/><br />{b.name}</div>
                                                         )
                                                     })
                                                 }  
