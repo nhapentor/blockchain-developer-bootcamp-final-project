@@ -4,8 +4,8 @@ import { useTranslations } from 'next-intl'
 import { useWeb3React } from "@web3-react/core"
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { getRankByPoints, getNextRankByPoints } from '../../../lib/ranks'
-import { getEmployeesContract, getTokenContract, getDiscussionBoardContract, getDiscussionContract } from '../../../lib/getContracts'
+import { getRankByPoints } from '../../../lib/ranks'
+import { getEmployeesContract, getTokenContract, getDiscussionBoardContract, getDiscussionContract, getBadgesContract } from '../../../lib/getContracts'
 import getGsnProvider from '../../../lib/getRelayProvider'
 import Link from 'next/link'
 
@@ -32,6 +32,8 @@ const EmployeePage = ({ employee }) => {
 
     const [ discussionList, setDiscussionList ] = useState([])
 
+    const [ badgeList, setBadgeList ] = useState([])  
+
     useEffect(async () => {
         if (!active) {
             router.push(`/`)
@@ -47,6 +49,7 @@ const EmployeePage = ({ employee }) => {
             .then((acc) => {
                 setAuthenticated(acc === employee.account.toLowerCase())
                 getPoints()
+                getBadges()
             })                       
         } 
 
@@ -116,7 +119,7 @@ const EmployeePage = ({ employee }) => {
         const gsnWeb3 = await getGsnProvider()
         const employeeContract = await getEmployeesContract(gsnWeb3)
 
-        await employeeContract.methods.addEmployee(data.id, data.name, data.email).send({ from: account, gasPrice: '20000000000' })
+        await employeeContract.methods.addEmployee(data.id, data.name, data.email, "").send({ from: account, gasPrice: '20000000000' })
         
         const tokenContract = await getTokenContract(library)
             
@@ -138,13 +141,49 @@ const EmployeePage = ({ employee }) => {
 
         (async () => {
             const tokenContract = await getTokenContract(library)
-            
+            const employeesContract = await getEmployeesContract(library)
+
             const balance = await tokenContract.methods.balanceOf(account).call({ from: account })
 
-            setUser({...user, points: balance / 1e18})
+            setUser({...user, points: library.utils.fromWei(balance)})
         })();
-
     }
+
+    const getBadgeMetadata = async (uri) => {
+
+        const res = await fetch(uri)
+    
+        const metadata = await res.json()
+    
+        return metadata
+    
+      }
+
+    const getBadges = async () => {
+
+        const employeesContract = await getEmployeesContract(library)
+        const e = await employeesContract.methods.getEmployees(account).call({ from: account})
+
+        const badgeContract = await getBadgesContract(library)        
+        
+        setBadgeList([])
+        
+        e.badges.map(async (b) => {
+
+            const uri = await badgeContract.methods.uri(b).call({ from: account });           
+
+            const metadata = await getBadgeMetadata(uri)
+
+            const badge = {
+                id: metadata.id,
+                name: metadata.name,
+                imageUrl: metadata.image
+            }
+
+            setBadgeList( prev => [...prev, badge])
+        })
+    }
+
 
     useEffect(() => {
         switch(onboardStep) {
@@ -211,22 +250,17 @@ const EmployeePage = ({ employee }) => {
                                             <h3 className="text-w-600">{user.name}</h3>
                                             <p>{user.email}</p>
                                         </div>
-                                        <div className="col-2 h-150 pr-0 py-1 bg-white text-center" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                                            <div>
-                                                <img src={getRankByPoints(user.points).imageUrl} width="50" />
-                                                <div>rank: <strong>{getRankByPoints(user.points).rank}</strong></div>
-                                                <div>points: <strong>{user.points}</strong></div>
-                                            </div>
+                                        <div className="col-4 pr-0 py-1 bg-white text-center" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                                            <div className="row">
+                                                {
+                                                    badgeList.map(b => {
 
-                                        </div>
-                                        <div className="col-2 h-150 pr-0 bg-white text-center" style={{ borderRadius: "0px 8px 8px 0px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                                            <figure className="pie-chart" style={{ background: `radial-gradient(circle closest-side, white 0, white 52.8%, transparent 52.8%, transparent 60%, white 0 ), conic-gradient(#ad49fb 0, #ad49fb ${100 - ((getNextRankByPoints(user.points).points - user.points) / (getNextRankByPoints(user.points).points - (getRankByPoints(user.points).points)) * 100)}%, #ccc 0, #ccc 100% )` }}>
-                                                <div className="caption-inside" >
-                                                    <img src={getNextRankByPoints(user.points).imageUrl} width="50" />
-                                                    <div>{getNextRankByPoints(user.points).rank}</div>
-                                                    <div>+{getNextRankByPoints(user.points).points - user.points}</div>
-                                                </div>
-                                            </figure>
+                                                        return (
+                                                            <div className="col"><img src={getRankByPoints(user.points).imageUrl} width="50"/><br />{b.name}</div>
+                                                        )
+                                                    })
+                                                }  
+                                            </div>                  
                                         </div>
                                     </div>
                                     <div className="row justify-content-center mt-3">
@@ -343,7 +377,7 @@ const EmployeePage = ({ employee }) => {
                                                             <img src={avatarImageSrc} style={{ height: "200px", objectFi: "contain" }} className={avatarImageSrc ? '': 'd-none'} />
                                                         </div> 
                                                         <div>                                                       
-                                                        <label for="file-ip-1" className="btn btn-sm btn-outline-sec w-120 border border-secondary">Upload</label>
+                                                        <label htmlFor="file-ip-1" className="btn btn-sm btn-outline-sec w-120 border border-secondary">Upload</label>
                                                         <input id="file-ip-1" className="d-none" type="file" name="pic" accept="image/*" onChange={onImageChange} />
                                                         </div>
                                                     </div>
