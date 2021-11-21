@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useWeb3React } from "@web3-react/core"
 import { injected } from "./wallet/connectors"
 import { updateEmployeeSignature } from '../lib/api';
-import { getTokenContract } from '../lib/getContracts';
+import { getTokenContract, getEmployeesContract } from '../lib/getContracts';
 
 const Navbar = ({ employee }) => {
 
@@ -16,7 +16,8 @@ const Navbar = ({ employee }) => {
   const [ profile, setProfile ]  = useState({
     tokenName: '',
     tokenAmount: 0,
-    account: ''
+    account: '',
+    employeeId: 0
   })
 
   const [isActive, setActive] = useState(active)
@@ -33,10 +34,18 @@ const Navbar = ({ employee }) => {
       const token = await getTokenContract(library)
       const tokenName = await token.methods.name().call({from: account})
       const tokenAmount = await token.methods.balanceOf(account).call({from: account})
+      let employeeId = employee ? employee.id : 0
+
+      if (!employeeId) {
+        const employeesContract = await getEmployeesContract(library)
+        const e = await employeesContract.methods.getEmployees(account).call({ from: account })        
+        employeeId = e.id
+      }
   
       setProfile({
         account,
         tokenName,
+        employeeId,
         tokenAmount: library.utils.fromWei(tokenAmount)
       })
     }
@@ -56,7 +65,7 @@ const Navbar = ({ employee }) => {
     try {
       deactivate()
       window.localStorage.removeItem('connectorIdv2')
-      await updateEmployeeSignature(employee.id, '', 0)
+      await updateEmployeeSignature(profile.employeeId, '', 0)
       router.push("/")
     } catch (ex) {
       console.log(ex)

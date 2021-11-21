@@ -40,9 +40,8 @@ const EmployeePage = ({ employee }) => {
         if (!active) {
             router.push(`/`)
         } else {
-            await authenticate()
+            await authenticate()    
         }
-
     }, [active])
 
     useEffect(async () => {
@@ -52,21 +51,24 @@ const EmployeePage = ({ employee }) => {
         }
     }, [account])
 
-    const authenticate = async () => {
+    const authenticate = async () => {        
 
+        setPageLoading(true)
         if (employee && employee.account && employee.signature && employee.timestamp) {
             library.eth.personal.ecRecover(t('Message to be signed', { timestamp: employee.timestamp }), employee.signature)
                 .then((acc) => {
-                    setAuthenticated(acc === employee.account.toLowerCase())
-                    getBalance()
-                    getBadges()
-                    getEmployee()
+                    (async () => {                        
+                        await getBalance()
+                        await getBadges()
+                        await getEmployee()
+                        await getAllDiscussions()
+                        setPageLoading(false)
+                        setAuthenticated(acc === employee.account.toLowerCase())
+                    })()
                 })
+        } else {
+            setPageLoading(false)
         }
-
-        await getAllDiscussions()
-
-        setPageLoading(false)
     }
 
     const handleSignMessage = () => {
@@ -136,10 +138,6 @@ const EmployeePage = ({ employee }) => {
 
         await employeeContract.methods.addEmployee(data.id, data.name, data.email, `${process.env.NEXT_PUBLIC_STRAPI_BACKEND}${media.url}`).send({ from: account, gasPrice: '20000000000' })
 
-        const tokenContract = await getTokenContract(library)
-
-        const balance = await tokenContract.methods.balanceOf(account).call({ from: account })
-
         await updateEmployee(data)
 
         window.location.reload(false)        
@@ -153,13 +151,10 @@ const EmployeePage = ({ employee }) => {
         return re.test(String(email).toLowerCase());
     }
 
-    const getBalance = () => {
-
-        (async () => {
-            const tokenContract = await getTokenContract(library)
-            const balance = await tokenContract.methods.balanceOf(account).call({ from: account })
-            setUser({ ...user, points: library.utils.fromWei(balance) })
-        })();
+    const getBalance = async () => {           
+        const tokenContract = await getTokenContract(library)
+        const balance = await tokenContract.methods.balanceOf(account).call({ from: account })
+        setUser({ ...user, points: library.utils.fromWei(balance) })
     }
 
     const getBadgeMetadata = async (uri) => {
