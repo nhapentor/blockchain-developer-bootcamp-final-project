@@ -15,7 +15,7 @@ const resolveWeb3 = async (resolve) => {
     const gsnConfig = {    
       preferredRelays: chainId === 4 ? [process.env.NEXT_PUBLIC_GSN_RELAYER] : [],
       relayLookupWindowBlocks: 600000,
-      paymasterAddress: chainId === 4 ? process.env.NEXT_PUBLIC_RINKEBY_PAYMASTER_ADDRESS : require('../../build/gsn/Forwarder.json').address
+      paymasterAddress: chainId === 4 ? process.env.NEXT_PUBLIC_RINKEBY_PAYMASTER_ADDRESS : require('../../build/gsn/Paymaster.json').address
     }
 
     const provider = RelayProvider.newProvider({ provider: web3.currentProvider, config: gsnConfig })

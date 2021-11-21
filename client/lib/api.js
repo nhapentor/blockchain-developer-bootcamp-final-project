@@ -5,7 +5,7 @@ async function fetchAPI(query, { variables } = {}) {
     //   variables,
     // })
     // console.log(body)
-    const res = await fetch(`http://18.142.159.88:1337/graphql`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_BACKEND}/graphql`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -57,16 +57,8 @@ async function fetchAPI(query, { variables } = {}) {
       employees(where: $where) {
         id            
         account
-        name
-        email
         signature
         timestamp
-        points
-        avatar { 
-          id
-          url
-        }
-        isOnboarded
       }
     }
     `,
@@ -88,9 +80,6 @@ async function fetchAPI(query, { variables } = {}) {
       employees(where: $where) {
         id            
         account
-        name
-        email
-        signature
         timestamp
         points
         avatar { 
@@ -120,18 +109,10 @@ async function fetchAPI(query, { variables } = {}) {
         createEmployee(input: { 
           data: $employee }) {
           employee {
-            id
+            id            
             account
-            name
-            email
             signature
             timestamp
-            points
-            avatar { 
-              id
-              url  
-            }
-            isOnboarded
           }
         }
       }
@@ -228,7 +209,7 @@ async function fetchAPI(query, { variables } = {}) {
     const formData = new FormData();
     formData.append('files', image)
 
-    const res = await fetch(`http://18.142.159.88:1337/upload`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_BACKEND}/upload`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json'

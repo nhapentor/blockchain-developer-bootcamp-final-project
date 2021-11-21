@@ -66,6 +66,7 @@ contract Employees is ERC2771Context {
         newEmployee.id = _id;
         newEmployee.name = _name;
         newEmployee.email = _email;
+        newEmployee.image = _image;
         
         employeeIds[_id] = true;
         employeeCount += 1;

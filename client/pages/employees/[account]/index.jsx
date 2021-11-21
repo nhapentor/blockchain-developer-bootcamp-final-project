@@ -4,7 +4,6 @@ import { useTranslations } from 'next-intl'
 import { useWeb3React } from "@web3-react/core"
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { getRankByPoints } from '../../../lib/ranks'
 import { getEmployeesContract, getTokenContract, getDiscussionBoardContract, getDiscussionContract, getBadgesContract } from '../../../lib/getContracts'
 import getGsnProvider from '../../../lib/getRelayProvider'
 import Link from 'next/link'
@@ -12,6 +11,7 @@ import Link from 'next/link'
 const EmployeePage = ({ employee }) => {
 
     const [isAuthenticated, setAuthenticated] = useState(false)
+    const [pageLoading, setPageLoading] = useState(true)
 
     const [progess, setProgress] = useState("1%")
 
@@ -45,17 +45,28 @@ const EmployeePage = ({ employee }) => {
 
     }, [active])
 
+    useEffect(async () => {
+        if (account && account != router.query.account) {
+            window.location.assign(`/employees/${account}`)
+            setPageLoading(true)
+        }
+    }, [account])
+
     const authenticate = async () => {
+
         if (employee && employee.account && employee.signature && employee.timestamp) {
             library.eth.personal.ecRecover(t('Message to be signed', { timestamp: employee.timestamp }), employee.signature)
                 .then((acc) => {
                     setAuthenticated(acc === employee.account.toLowerCase())
-                    getPoints()
+                    getBalance()
                     getBadges()
+                    getEmployee()
                 })
         }
 
         await getAllDiscussions()
+
+        setPageLoading(false)
     }
 
     const handleSignMessage = () => {
@@ -110,7 +121,7 @@ const EmployeePage = ({ employee }) => {
         }
     }
 
-    const onFinish = async () => {
+    const onSubmitClicked = async () => {
 
 
         setProcessing(true)
@@ -123,16 +134,17 @@ const EmployeePage = ({ employee }) => {
         const gsnWeb3 = await getGsnProvider()
         const employeeContract = await getEmployeesContract(gsnWeb3)
 
-        await employeeContract.methods.addEmployee(data.id, data.name, data.email, "").send({ from: account, gasPrice: '20000000000' })
+        await employeeContract.methods.addEmployee(data.id, data.name, data.email, `${process.env.NEXT_PUBLIC_STRAPI_BACKEND}${media.url}`).send({ from: account, gasPrice: '20000000000' })
 
         const tokenContract = await getTokenContract(library)
 
         const balance = await tokenContract.methods.balanceOf(account).call({ from: account })
 
         await updateEmployee(data)
-        setUser({ ...user, name: employee.name, email: employee.email, avatar: { id: media.id, url: media.url }, isOnboarded: true, points: balance / 1e18 })
 
-        window.location.reload(false)
+        window.location.reload(false)        
+
+        setPageLoading(true)
 
     }
 
@@ -141,14 +153,11 @@ const EmployeePage = ({ employee }) => {
         return re.test(String(email).toLowerCase());
     }
 
-    const getPoints = () => {
+    const getBalance = () => {
 
         (async () => {
             const tokenContract = await getTokenContract(library)
-            const employeesContract = await getEmployeesContract(library)
-
             const balance = await tokenContract.methods.balanceOf(account).call({ from: account })
-
             setUser({ ...user, points: library.utils.fromWei(balance) })
         })();
     }
@@ -188,6 +197,17 @@ const EmployeePage = ({ employee }) => {
         })
     }
 
+    const getEmployee = async () => {
+
+        const employeesContract = await getEmployeesContract(library)
+        const e = await employeesContract.methods.getEmployees(account).call({ from: account })
+
+        if (e.name && e.email) {
+            setUser({ ...user, isOnboarded: true, id: e.id, name: e.name, email: e.email, image: e.image })
+        } else {
+            setUser({ ...user, isOnboarded: false })
+        }        
+    }
 
     useEffect(() => {
         switch (onboardStep) {
@@ -237,10 +257,12 @@ const EmployeePage = ({ employee }) => {
 
     }
 
-
     return (
         <>
-            {isAuthenticated ?
+            { 
+                pageLoading ? <h1>Loading</h1> :
+            
+                isAuthenticated ?
                 <>
                     <div className="container">
                         {
@@ -248,7 +270,7 @@ const EmployeePage = ({ employee }) => {
                                 <>
                                     <div className="row justify-content-center mt-3">
                                         <div className="col-2 h-150 pr-0 img-cover" style={{ borderRadius: "8px 0px 0px 8px" }}>
-                                            <img src={`http://18.142.159.88:1337${user.avatar.url}`} className="img-fluid center" style={{ maxWidth: "100%", height: "auto" }} alt="user" />
+                                            <img src={`${user.image}`} className="img-fluid center" style={{ maxWidth: "100%", height: "auto" }} alt="user" />
                                         </div>
                                         <div className="col-6 bg-white p-4">
                                             <h3 className="text-w-600">{user.name}</h3>
@@ -410,9 +432,9 @@ const EmployeePage = ({ employee }) => {
                                                             <p className="text-center my-2"><strong>Email:</strong> {user.email}</p>
                                                         </div>
                                                         <div style={{ padding: "16px" }}>
-                                                            <button class="next action-button btn-sm" type="button" disabled={processing} onClick={onFinish}>
+                                                            <button className="next action-button btn-sm" type="button" disabled={processing} onClick={onSubmitClicked}>
                                                                 {
-                                                                    processing && <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                                                                    processing && <span className="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
                                                                 }
                                                                 {
                                                                     !processing && <span>Submit</span>
@@ -456,7 +478,7 @@ export async function getServerSideProps({ params }) {
     if (!data) {
         data = await createEmployee({ account: params.account })
     }
-
+    
     return {
         props: {
             employee: {
