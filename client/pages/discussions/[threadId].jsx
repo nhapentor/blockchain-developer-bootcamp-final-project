@@ -114,65 +114,66 @@ export default () => {
     }
 
   return (<>
-
-    <UserProfile />
-    <div className="row justify-content-center mt-3">
-      <div className="col-6 bg-white p-0" style={{ borderRadius: "8px" }} >
-        <div className="card">
-          <div className="card-header">
-            <strong className="card-title">{discussion.title}</strong>
-          </div>
-          <div className="card-body">
-            <p className="card-text mt-2 mb-4">{discussion.description}</p>
-            <div>
-              <span className="badge bg-light text-dark">{`${discussion.replyCount} replies`}</span>
-              <span className="float-end" style={{ fontSize: "12px", fontWeight: "600" }}>{`${discussion.owner}`}</span>
-              { discussion.isClosed
-                  ? <span className="badge bg-secondary mx-1">closed</span>
-                  : 
-                  <span className="badge bg-success mx-1">{`+${discussion.reward} XBR`}</span>
-              }
-            </div>
-          </div>
-        </div>
-        {!discussion.isClosed &&
+    <div className="container">
+      <UserProfile />
+      <div className="row justify-content-center mt-3">
+        <div className="col-6 bg-white p-0" style={{ borderRadius: "8px" }} >
           <div className="card">
+            <div className="card-header">
+              <strong className="card-title">{discussion.title}</strong>
+            </div>
             <div className="card-body">
-              <hr className="mt-0" />
-              <div className="mb-3">
-                <textarea className="form-control" rows="3" value={message} onChange={onMessageChanged} placeholder="Share your thoughs here..."></textarea>
+              <p className="card-text mt-2 mb-4">{discussion.description}</p>
+              <div>
+                <span className="badge bg-light text-dark">{`${discussion.replyCount} replies`}</span>
+                <span className="float-end" style={{ fontSize: "12px", fontWeight: "600" }}>{`${discussion.owner}`}</span>
+                {discussion.isClosed
+                  ? <span className="badge bg-secondary mx-1">closed</span>
+                  :
+                  <span className="badge bg-success mx-1">{`+${discussion.reward} XBR`}</span>
+                }
               </div>
-              <button className="form-control btn btn-sm btn-gra w-120 float-end" onClick={onSubmit}>Submit</button>
             </div>
           </div>
-        }
-      </div>
-    </div>
-
-{
-    replies.map((r, idx) => {
-      return (
-        <div key={idx} className="row justify-content-center mt-3">
-          <div className="col-6 bg-white p-0" style={{ borderRadius: "8px" }} >
+          {!discussion.isClosed &&
             <div className="card">
               <div className="card-body">
-                <p className="card-text">{r.message}</p>
-                <div>
-                  { !discussion.isClosed && !r.isSelfReply && account === discussion.ownerAddress && 
-                    <button className="btn btn-sm btn-outline-sec" onClick={() => onApproveClicked(idx)}>approve</button>
-                  }
-                  { discussion.isClosed && r.isApproved &&
-                    <span className="badge bg-success">approved</span>
-                  }
-                  <span className="float-end" style={{ fontSize: "12px", fontWeight: "600" }}>{`${r.replier}`}</span>
+                <hr className="mt-0" />
+                <div className="mb-3">
+                  <textarea className="form-control" rows="3" value={message} onChange={onMessageChanged} placeholder="Share your thoughs here..."></textarea>
+                </div>
+                <button className="form-control btn btn-sm btn-gra w-120 float-end" onClick={onSubmit}>Submit</button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      {
+        replies.map((r, idx) => {
+          return (
+            <div key={idx} className="row justify-content-center mt-3">
+              <div className="col-6 bg-white p-0" style={{ borderRadius: "8px" }} >
+                <div className="card">
+                  <div className="card-body">
+                    <p className="card-text">{r.message}</p>
+                    <div>
+                      {!discussion.isClosed && !r.isSelfReply && account === discussion.ownerAddress &&
+                        <button className="btn btn-sm btn-outline-sec" onClick={() => onApproveClicked(idx)}>approve</button>
+                      }
+                      {discussion.isClosed && r.isApproved &&
+                        <span className="badge bg-success">approved</span>
+                      }
+                      <span className="float-end" style={{ fontSize: "12px", fontWeight: "600" }}>{`${r.replier}`}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      )
-    })
-  }
+          )
+        })
+      }
+    </div>
   </>
   )
     

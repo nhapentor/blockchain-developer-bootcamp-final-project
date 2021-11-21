@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
 import { useWeb3React } from "@web3-react/core"
 import { getEmployeesContract, getTokenContract, getBadgesContract } from '../lib/getContracts'
 
@@ -9,6 +10,7 @@ const UserProfile = () => {
 
     const { active, account, library } = useWeb3React()
     
+    const router = useRouter()
 
     useEffect(async () => {
 
@@ -17,8 +19,20 @@ const UserProfile = () => {
             await getBadges()
         }
 
-
     }, [active])
+
+    useEffect(async () => {
+
+        if (account && user.account && account != user.account) {
+
+            if (router.query.account === user.account) {
+                window.location.assign(window.location.href.replace(user.account, account))            
+            } else {
+                window.location.reload(false)
+            }
+        }        
+
+    }, [account])
 
     const getBadgeMetadata = async (uri) => {
 
@@ -63,11 +77,10 @@ const UserProfile = () => {
         const employeesContract = await getEmployeesContract(library)
         const e = await employeesContract.methods.getEmployees(account).call({ from: account })
 
-        console.log(e)
         if (e.name && e.email) {
-            setUser({ ...user, isOnboarded: true, id: e.id, name: e.name, email: e.email, image: e.image, balance: library.utils.fromWei(balance) })
+            setUser({ ...user, account, isOnboarded: true, id: e.id, name: e.name, email: e.email, image: e.image, balance: library.utils.fromWei(balance) })
         } else {
-            setUser({ ...user, isOnboarded: false })
+            window.location.assign('/')
         }        
     }
 
