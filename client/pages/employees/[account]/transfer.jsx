@@ -51,7 +51,7 @@ export default ({ employees }) => {
 
         const gsnWeb3 = await getGsnProvider()        
         const tokenContract = await getTokenContract(gsnWeb3)
-        await tokenContract.methods.transfer(library.utils.toChecksumAddress(colleague[0].account), library.utils.toWei(amount.toString())).send({ from: account })
+        await tokenContract.methods.transfer(library.utils.toChecksumAddress(colleague[0].account), library.utils.toWei(amount.toString())).send({ from: account, gasPrice: '20000000000' })
 
         window.location.assign(`/employees/${account}`)
     }

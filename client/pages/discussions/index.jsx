@@ -67,7 +67,7 @@ export default () => {
                           </div>
                           {
                               discussionList.length !== 0 ?
-                              discussionList.slice(0).reverse().map((d) => {
+                              discussionList.sort((x, y) => x.index > y.index ? -1 : 1).map((d) => {
 
                                       return (
                                           <div key={`thread-${d.index}`} className="card-body" style={{borderBottom: `${d.index === 0 ? "0": "1px"} solid #ccc`}}>

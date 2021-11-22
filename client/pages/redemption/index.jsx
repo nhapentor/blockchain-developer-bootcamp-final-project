@@ -111,7 +111,7 @@ export default () => {
                               badgeList.length !== 0 &&
                               <>
                                   {
-                                      badgeList.map((b) => {
+                                      badgeList.sort((x, y) => x.id > y.id ? 1 : -1).map((b) => {
                                           return (
                                               <div key={`b-${b.id}`} className="col-6 p-3" style={{ display: "flex", flexDirection: "column", alignItems: "stretch", justifyContent: "space-between"}}>
                                                       <div className="text-center" style={{ display: "flex", justifyContent: "center", flexGrow: 1 }}>

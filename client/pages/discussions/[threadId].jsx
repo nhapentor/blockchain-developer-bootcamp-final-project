@@ -91,7 +91,7 @@ export default () => {
 
       const discussionContract = await getDiscussionContract(gsnWeb3, threadId)
 
-      await discussionContract.methods.addReply(message).send({from: account})
+      await discussionContract.methods.addReply(message).send({from: account, gasPrice: '20000000000' })
 
       window.location.reload(false)
 
@@ -107,7 +107,7 @@ export default () => {
 
       const discussionContract = await getDiscussionContract(gsnWeb3, threadId)
 
-      await discussionContract.methods.approveReply(idx).send({from: account})
+      await discussionContract.methods.approveReply(idx).send({from: account, gasPrice: '20000000000' })
 
       window.location.reload(false)
       
@@ -150,16 +150,16 @@ export default () => {
       </div>
 
       {
-        replies.map((r, idx) => {
+        replies.sort((x, y) => x.index > y.index ? -1 : 1).map((r) => {
           return (
-            <div key={idx} className="row justify-content-center mt-3">
+            <div key={r.index} className="row justify-content-center mt-3">
               <div className="col-6 bg-white p-0" style={{ borderRadius: "8px" }} >
                 <div className="card">
                   <div className="card-body">
                     <p className="card-text">{r.message}</p>
                     <div>
                       {!discussion.isClosed && !r.isSelfReply && account === discussion.ownerAddress &&
-                        <button className="btn btn-sm btn-outline-sec" onClick={() => onApproveClicked(idx)}>approve</button>
+                        <button className="btn btn-sm btn-outline-sec" onClick={() => onApproveClicked(r.index)}>approve</button>
                       }
                       {discussion.isClosed && r.isApproved &&
                         <span className="badge bg-success">approved</span>
