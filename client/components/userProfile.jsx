@@ -7,6 +7,7 @@ const UserProfile = () => {
 
     const [user, setUser] = useState({})
     const [badgeList, setBadgeList] = useState([])
+    const [isLoaded, setLoaded] = useState(false)
 
     const { active, account, library } = useWeb3React()
     
@@ -17,6 +18,7 @@ const UserProfile = () => {
         if (active && account) {
             await getEmployee()
             await getBadges()
+            setLoaded(true)
         }
 
     }, [active])
@@ -85,32 +87,36 @@ const UserProfile = () => {
     }
 
     return (
-        <div className="row justify-content-center mt-3">
-            <div className="col-2 h-150 pr-0 img-cover" style={{ borderRadius: "8px 0px 0px 8px" }}>
-                <img src={`${user.image}`} className="img-fluid center" style={{ maxWidth: "100%", height: "auto" }} alt="user" />
-            </div>
-            <div className="col-6 bg-white p-4">
-                <h3 className="text-w-600">{user.name}</h3>
-                <p>{user.email}</p>
-                <p className="my-0 text-muted" style={{fontSize: "small", fontWeight: 600}}>XABER: {
-                    user.balance === 0 ? <span className="text-dark">0</span> : <span className="text-success">+{user.balance}</span>
-                }
-                </p>
-                
-            </div>
-            <div className="col-4 pr-0 py-1 bg-white text-center" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                <div className="row">
-                    {
-                        badgeList.map(b => {
-
-                            return (
-                                <div key={`badge-${b.id}`} className="col"><img src={b.imageUrl} width="50" /><br />{b.name}</div>
-                            )
-                        })
+        <>
+        { isLoaded &&
+            <div className="row justify-content-center mt-3" style={{ paddingLeft: "5.5rem", paddingRight: "5.5rem"}}>
+                <div className="col-2 h-150 pr-0 img-cover" style={{ borderRadius: "8px 0px 0px 8px" }}>
+                    <img src={`${user.image}`} className="img-fluid center" style={{ maxWidth: "100%", height: "auto" }} alt="user" />
+                </div>
+                <div className="col-6 bg-white p-4">
+                    <h3 className="text-w-600">{user.name}</h3>
+                    <p>{user.email}</p>
+                    <p className="my-0 text-muted" style={{fontSize: "small", fontWeight: 600}}>XABER: {
+                        user.balance === 0 ? <span className="text-dark">0</span> : <span className="text-success">+{user.balance}</span>
                     }
+                    </p>
+                    
+                </div>
+                <div className="col-4 pr-0 py-1 bg-white text-center" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                    <div className="row">
+                        {
+                            badgeList.map(b => {
+
+                                return (
+                                    <div key={`badge-${b.id}`} className="col"><img src={b.imageUrl} width="50" /><br />{b.name}</div>
+                                )
+                            })
+                        }
+                    </div>
                 </div>
             </div>
-        </div>
+        }    
+        </>
     )
 }
 
