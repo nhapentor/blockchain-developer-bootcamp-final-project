@@ -12,7 +12,7 @@ contract Badges is ERC1155, AccessControl {
     
     mapping (uint256 => string) private _uris;
 
-    constructor() ERC1155("https://bafybeifgqgbx665w5aenxzalb6qd3mmsgqorkgooctjwnnnkymzgzrealu.ipfs.dweb.link/{id}.json") {
+    constructor() ERC1155("https://bafybeia53cjlllo2bg7hp4tufqrqfickthxgrrxaser6whxammh3mzcyli.ipfs.dweb.link/{id}.json") {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(URI_SETTER_ROLE, msg.sender);
         _setupRole(MINTER_ROLE, msg.sender);
@@ -21,7 +21,7 @@ contract Badges is ERC1155, AccessControl {
     function uri(uint256 tokenId) override public pure returns (string memory) {
         return (
             string(abi.encodePacked(
-                "https://bafybeifgqgbx665w5aenxzalb6qd3mmsgqorkgooctjwnnnkymzgzrealu.ipfs.dweb.link/",
+                "https://bafybeia53cjlllo2bg7hp4tufqrqfickthxgrrxaser6whxammh3mzcyli.ipfs.dweb.link/",
                 Strings.toString(tokenId),
                 ".json"))
         );

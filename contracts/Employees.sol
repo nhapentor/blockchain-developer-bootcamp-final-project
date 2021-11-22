@@ -12,13 +12,12 @@ contract Employees is ERC2771Context {
     XABER tokenContract;
     Badges badgesContract;
 
-    uint256 public constant SCOUT = 1;
-    uint256 public constant HIKER = 2;
-    uint256 public constant EXPLORER = 3;
-    uint256 public constant ADENTURER = 4;
-    uint256 public constant MOUNTAINEER = 5;
-    uint256 public constant EXPEDITIONER = 6;
-    uint256 public constant RANGER = 7;
+    uint256 public constant NOOB = 1;
+    uint256 public constant ROOKIE = 2;
+    uint256 public constant NOVICE = 3;
+    uint256 public constant COMMON = 4;
+    uint256 public constant MAJOR = 5;
+    uint256 public constant MASTER = 6;
 
     uint256[] private badgeIds;
     mapping(uint256 => uint256) private badgeExchangeRates;    
@@ -46,15 +45,14 @@ contract Employees is ERC2771Context {
         badgesContract = Badges(_badgesContract);
         employeeCount = 0;
 
-        badgeIds = [SCOUT, HIKER, EXPLORER, ADENTURER, MOUNTAINEER, EXPEDITIONER, RANGER];
+        badgeIds = [NOOB, ROOKIE, NOVICE, COMMON, MAJOR, MASTER];
 
-        badgeExchangeRates[SCOUT] = 5000000000000000000;
-        badgeExchangeRates[HIKER] = 10000000000000000000;
-        badgeExchangeRates[EXPLORER] = 15000000000000000000;
-        badgeExchangeRates[ADENTURER] = 30000000000000000000;
-        badgeExchangeRates[MOUNTAINEER] = 50000000000000000000;
-        badgeExchangeRates[EXPEDITIONER]= 100000000000000000000;
-        badgeExchangeRates[RANGER] = 200000000000000000000;
+        badgeExchangeRates[NOOB] = 5000000000000000000;
+        badgeExchangeRates[ROOKIE] = 10000000000000000000;
+        badgeExchangeRates[NOVICE] = 15000000000000000000;
+        badgeExchangeRates[COMMON] = 30000000000000000000;
+        badgeExchangeRates[MAJOR] = 50000000000000000000;
+        badgeExchangeRates[MASTER]= 100000000000000000000;
     }
     
     function addEmployee(uint256 _id, string memory _name, string memory _email, string memory _image) 
