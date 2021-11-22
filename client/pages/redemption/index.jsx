@@ -103,41 +103,53 @@ export default () => {
               <UserProfile />
               <div className="row justify-content-center mt-3">
                   <div className="col-6 bg-white p-0" style={{ borderRadius: "8px" }} >
-                      {
-                          badgeList.length !== 0 &&
-                          <>
-                              {
-                                  badgeList.map((b) => {
-                                      return (
-                                          <div key={`thread-${b.id}`} className="card">
-                                              <img src={b.imageUrl} className="card-img-top" style={{ height: "80px", width: "auto" }} />
-                                              <div className="card-body">
-                                                  <h5 className="card-title">{b.name}</h5>
-                                                  <p className="card-text">{b.exchangeRate}</p>
-                                                  {
-                                                      balance >= Number(b.exchangeRate) && (
-                                                          <>
-                                                              {
-                                                                  allowance < Number(b.exchangeRate) && (<button className="btn btn-sm btn-outline-sec" onClick={() => onApproveAmountClicked(b.exchangeRate)}>Approve</button>)
-                                                              }
-                                                              {
-                                                                  <button className="btn btn-sm btn-gra" disabled={balance < Number(b.exchangeRate) || allowance < Number(b.exchangeRate)} onClick={() => onRedeemClicked(b.id)}>Redeem</button>
-                                                              }
-                                                          </>)
-                                                  }
-                                                  {
-                                                      balance < Number(b.exchangeRate) &&
-                                                      <>
-                                                          <p>Insufficient points!</p>
-                                                      </>
-                                                  }
+                    <div className="card-header">
+                        <strong className="card-title">Redeem your XABER</strong>
+                        </div>
+                      <div className="row">
+                          {
+                              badgeList.length !== 0 &&
+                              <>
+                                  {
+                                      badgeList.map((b) => {
+                                          return (
+                                              <div key={`b-${b.id}`} className="col-6 p-3" style={{ display: "flex", flexDirection: "column", alignItems: "stretch", justifyContent: "space-between"}}>
+                                                      <div className="text-center" style={{ display: "flex", justifyContent: "center", flexGrow: 1 }}>
+                                                          <img src={b.imageUrl} style={{ maxWidth: "40%", flexGrow: 1}} />
+                                                      </div>
+                                                      <div className="card-body" style={{display: "flex", flexDirection: "column", justifyContent: "space-around", flex: "0 0 150px"}}>
+                                                          <div>
+                                                          <h5 className="card-title float-start text-uppercase">{b.name}</h5>
+                                                          <p className={`card-text text-end${balance < Number(b.exchangeRate) ? ' text-danger' : ' text-success'}`} style={{ fontSize: "small", fontWeight: "400"}}>+{b.exchangeRate} XABER</p>
+                                                          </div>
+                                                          <div>
+                                                          {
+                                                              balance >= Number(b.exchangeRate) && (
+                                                                  <>
+                                                                      {       
+                                                                          <button className="btn btn-sm btn-gra float-end" disabled={balance < Number(b.exchangeRate) || allowance < Number(b.exchangeRate)} onClick={() => onRedeemClicked(b.id)}>Redeem</button>
+                                                                      }
+                                                                      {
+                                                                          allowance < Number(b.exchangeRate) && (<button className="mx-2 btn btn-sm btn-outline-sec float-end" onClick={() => onApproveAmountClicked(b.exchangeRate)}>Approve</button>)
+                                                                      }
+                                                                  </>)
+                                                          }
+                                                          {
+                                                              balance < Number(b.exchangeRate) &&
+                                                              <>                                                                  
+                                                                  <p className="text-muted text-end">Insufficient XABER!</p>
+                                                              </>
+                                                          }
+                                                          </div>
+                                                      </div>
+                                              
                                               </div>
-                                          </div>
-                                      )
-                                  })
-                              }
-                          </>
-                      }
+                                          )
+                                      })
+                                  }
+                              </>
+                          }
+                      </div>
                   </div>
               </div>
           </>

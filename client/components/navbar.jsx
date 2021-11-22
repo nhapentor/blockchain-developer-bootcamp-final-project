@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useWeb3React } from "@web3-react/core"
 import { injected } from "./wallet/connectors"
 import { updateEmployeeSignature } from '../lib/api';
-import { getTokenContract, getEmployeesContract } from '../lib/getContracts';
+import { getEmployeesContract } from '../lib/getContracts';
 
 const Navbar = ({ employee }) => {
 
