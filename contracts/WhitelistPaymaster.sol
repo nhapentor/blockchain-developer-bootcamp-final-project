@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.10;
 
 pragma experimental ABIEncoderV2;
 
@@ -15,15 +15,19 @@ contract WhitelistPaymaster is BasePaymaster {
     mapping (address=>bool) public senderWhitelist;
     mapping (address=>bool) public targetWhitelist;
 
+    /// @dev To only accept the forward fron whitelisted sender
     function whitelistSender(address sender) public onlyOwner {
         senderWhitelist[sender]=true;
         useSenderWhitelist = true;
     }
+
+    /// @dev To only relay to whitelisted target
     function whitelistTarget(address target) public onlyOwner {
         targetWhitelist[target]=true;
         useTargetWhitelist = true;
     }
 
+    /// @dev Pre replayed call hook
     function preRelayedCall(
         GsnTypes.RelayRequest calldata relayRequest,
         bytes calldata signature,
@@ -45,6 +49,7 @@ contract WhitelistPaymaster is BasePaymaster {
         return ("", false);
     }
     
+    /// @dev Post relayed call hook
     function postRelayedCall(
         bytes calldata context,
         bool success,
@@ -54,6 +59,7 @@ contract WhitelistPaymaster is BasePaymaster {
         (context, success, gasUseWithoutPost, relayData);
     }
     
+    /// @dev Return version of Paymaster
     function versionPaymaster() external view override virtual returns (string memory){
         return "2.2.4+opengsn.accepteverything.ipaymaster";
     }

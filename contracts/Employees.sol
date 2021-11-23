@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.10;
 
 import "./XABER.sol";
 import "./Badges.sol";
@@ -12,38 +12,32 @@ contract Employees is ERC2771Context {
     XABER tokenContract;
     Badges badgesContract;
 
-    uint256 public constant NOOB = 1;
-    uint256 public constant ROOKIE = 2;
-    uint256 public constant NOVICE = 3;
-    uint256 public constant COMMON = 4;
-    uint256 public constant MAJOR = 5;
-    uint256 public constant MASTER = 6;
+    uint256 private constant NOOB = 1;
+    uint256 private constant ROOKIE = 2;
+    uint256 private constant NOVICE = 3;
+    uint256 private constant COMMON = 4;
+    uint256 private constant MAJOR = 5;
+    uint256 private constant MASTER = 6;
 
     uint256[] private badgeIds;
     mapping(uint256 => uint256) private badgeExchangeRates;    
 
-    
-    mapping(address => Employee) public employees;
-    mapping(uint256 => bool) public employeeIds;
-
-    uint256 public employeeCount;
+    mapping(address => Employee) private employees;
+    mapping(uint256 => bool) private employeeIds;
 
     modifier doesNotExist(uint256 _id, address _address)  {
         require(_id > 0 && !employeeIds[_id]  && employees[_address].id == 0);
         _;
     }
-    
-    /*
-     * Events
-     */
+
     event LogEmployeeAdded(uint256 id, string name, string email);
     
+    /// @dev Pass a trusted forwarder to ERC2771Context
     constructor(address _tokenContract, address _badgesContract, address _trustedForwarder) 
     ERC2771Context(_trustedForwarder)
     {
         tokenContract = XABER(_tokenContract);
         badgesContract = Badges(_badgesContract);
-        employeeCount = 0;
 
         badgeIds = [NOOB, ROOKIE, NOVICE, COMMON, MAJOR, MASTER];
 
@@ -67,7 +61,6 @@ contract Employees is ERC2771Context {
         newEmployee.image = _image;
         
         employeeIds[_id] = true;
-        employeeCount += 1;
 
         tokenContract.mint(_msgSender(), 10000000000000000000);
 
