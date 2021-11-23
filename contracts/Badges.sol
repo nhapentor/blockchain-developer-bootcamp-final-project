@@ -1,23 +1,25 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.2;
+pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
+/// @title Contract for miniting NFT badges
+/// @author Samphan Pojanasophanakul
+/// @notice Allow minting of NFT tokens
 contract Badges is ERC1155, AccessControl {
 
-    bytes32 public constant URI_SETTER_ROLE = keccak256("URI_SETTER_ROLE");
+    /// @dev MINTER_ROLE constant
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    
-    mapping (uint256 => string) private _uris;
 
+    /// @dev The URI supplied to ERC1155 constructor will be overridden 
     constructor() ERC1155("https://bafybeia53cjlllo2bg7hp4tufqrqfickthxgrrxaser6whxammh3mzcyli.ipfs.dweb.link/{id}.json") {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _setupRole(URI_SETTER_ROLE, msg.sender);
-        _setupRole(MINTER_ROLE, msg.sender);
+        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        _setupRole(MINTER_ROLE, _msgSender());
     }
     
+    /// @notice Return the metadata URI for the given `tokenId` 
     function uri(uint256 tokenId) override public pure returns (string memory) {
         return (
             string(abi.encodePacked(
@@ -27,17 +29,21 @@ contract Badges is ERC1155, AccessControl {
         );
     }
     
-    function addMinter(address minter) public {
+    /// @notice Grant MINTER_ROLE to `minter`.
+    /// @dev Used to assign MINTER_ROLE to other contract so it can mint tokens.
+    function addMinter(address minter) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setupRole(MINTER_ROLE, minter);
     }
 
-    function mint(address account, uint256 id, uint256 amount, bytes memory data)
-        public
-        onlyRole(MINTER_ROLE)
+    /// @notice Mint `amount` tokens of the given `tokenId` to `recipient`.
+    function mint(address recipient, uint256 tokenId, uint256 amount, bytes memory data) 
+        external 
+        onlyRole(MINTER_ROLE) 
     {
-        _mint(account, id, amount, data);
+         _mint(recipient, tokenId, amount, data);
     }
-    
+
+    /// @dev Override the parents' method   
     function supportsInterface(bytes4 interfaceId)
         public
         view

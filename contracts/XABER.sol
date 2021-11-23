@@ -1,47 +1,49 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.4.22 <0.9.0;
+pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-
-// import "@opengsn/contracts/src/BaseRelayRecipient.sol";
-
 import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 
+/**
+* @title Contract of the XABER token
+* @author Samphan Pojanasophanakul
+* @notice A mintable and burnable ERC20 token
+* @dev Inherit from ERC2771Context to allow calling from trusted forwarder 
+* on behalf of sender
+*/
 contract XABER is ERC20, AccessControl, ERC2771Context { 
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
-    constructor(address trustedForwarder) ERC20("XABER", "XBR") ERC2771Context(trustedForwarder){
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _setupRole(MINTER_ROLE, msg.sender);
-        _setupRole(BURNER_ROLE, msg.sender);
+    /// @dev Pass a trusted forwarder to ERC2771Context     
+    constructor(address trustedForwarder) ERC20("XABER", "XBR") 
+    ERC2771Context(trustedForwarder){
+        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        _setupRole(MINTER_ROLE, _msgSender());
+        _setupRole(BURNER_ROLE, _msgSender());
     }
-    
-    function addMinter(address minter) public onlyRole(DEFAULT_ADMIN_ROLE) {
+
+    /// @notice Grant MINTER_ROLE to `minter`.
+    /// @dev Used to assign MINTER_ROLE to other contract so it can mint tokens.
+    function addMinter(address minter) external onlyRole(DEFAULT_ADMIN_ROLE) 
+    {
         _setupRole(MINTER_ROLE, minter);
     }
 
-    function addBurner(address minter) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setupRole(BURNER_ROLE, minter);
+    /// @notice Grant BURNER_ROLE to `burner`.
+    /// @dev Used to assign BURNER_ROLE to other contract so it can burn tokens.
+    function addBurner(address burner) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setupRole(BURNER_ROLE, burner);
     }
 
-    function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
-        _mint(to, amount);
+    /// @notice Mint `amount` tokens to the `recipient`.
+    function mint(address recipient, uint256 amount) external onlyRole(MINTER_ROLE) {
+        _mint(recipient, amount);
     }
 
-    /**
-     * @dev Destroys `amount` tokens from `account`, deducting from the caller's
-     * allowance.
-     *
-     * See {ERC20-_burn} and {ERC20-allowance}.
-     *
-     * Requirements:
-     *
-     * - the caller must have allowance for ``accounts``'s tokens of at least
-     * `amount`.
-     */
+    /// @notice Destroys `amount` tokens from `account`, deducting from the caller's allowance. 
     function burnFrom(address account, uint256 amount) public onlyRole(BURNER_ROLE) {
         uint256 currentAllowance = allowance(account, _msgSender());
         require(currentAllowance >= amount, "ERC20: burn amount exceeds allowance");
