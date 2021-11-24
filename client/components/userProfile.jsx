@@ -105,10 +105,10 @@ const UserProfile = () => {
                 <div className="col-4 pr-0 py-1 bg-white text-center" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
                     <div className="row">
                         {
-                            badgeList.sort((x, y) => x.id > y.id ? 1 : -1).map(b => {
+                            badgeList.sort((x, y) => x.id > y.id ? 1 : -1).map((b, idx) => {
 
                                 return (
-                                    <div key={`badge-${b.id}`} className="col text-uppercase"><img src={b.imageUrl} width="50" /><br />{b.name}</div>
+                                    <div key={`badge-${idx}`} className="col text-uppercase"><img src={b.imageUrl} width="50" /><br />{b.name}</div>
                                 )
                             })
                         }
