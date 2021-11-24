@@ -46,8 +46,7 @@ contract Discussion is Ownable, ERC2771Context {
     }
     
     /// @dev Add the reply in the array
-    function addReply(string memory _message) external returns (bool) 
-    {
+    function addReply(string memory _message) external returns (bool) {
         
         Reply storage newReply = replies.push();
         newReply.message = _message;
@@ -59,8 +58,8 @@ contract Discussion is Ownable, ERC2771Context {
     }
     
     /// @notice When owner approve the reply, the token rewards to the replier
-    function approveReply(uint256 replyIndex) external onlyOwner returns (bool) 
-    {
+    function approveReply(uint256 replyIndex) external onlyOwner returns (bool) {
+        
         isClosed = true;
         approvedReply = replyIndex;
         

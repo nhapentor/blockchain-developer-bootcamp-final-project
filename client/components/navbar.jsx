@@ -34,7 +34,7 @@ const Navbar = ({ employee }) => {
 
       if (!employeeId) {
         const employeesContract = await getEmployeesContract(library)
-        const e = await employeesContract.methods.getEmployees(account).call({ from: account })        
+        const e = await employeesContract.methods.getEmployee(account).call({ from: account })        
         employeeId = e.id
       }      
   

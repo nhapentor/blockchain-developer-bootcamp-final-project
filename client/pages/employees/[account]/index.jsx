@@ -152,7 +152,7 @@ const EmployeePage = ({ employee }) => {
     const getEmployee = async () => {
 
         const employeesContract = await getEmployeesContract(library)
-        const e = await employeesContract.methods.getEmployees(account).call({ from: account })
+        const e = await employeesContract.methods.getEmployee(account).call({ from: account })
 
         if (e.name && e.email) {
             setUser({ ...user, isOnboarded: true, id: e.id, name: e.name, email: e.email, image: e.image })

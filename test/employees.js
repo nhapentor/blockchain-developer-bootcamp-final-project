@@ -1,5 +1,6 @@
 const Employees = artifacts.require("Employees");
 const Xaber = artifacts.require("Xaber");
+const Badges = artifacts.require("Badges")
 
 const { catchRevert } = require("./exceptionsHelpers.js");
 
@@ -12,37 +13,37 @@ contract("Employees", function (accounts) {
   const aliceProfile = {
     id: 123,
     name: "Alice",
-    email: "alice@example.com"
+    email: "alice@example.com",
+    image: "http://www.example.com/img/alice.jpg"
   }
 
   const bobProfile = {
     id: 456,
     name: "Bob",
-    email: "bob@example.com"
+    email: "bob@example.com",
+    image: "http://www.example.com/img/bob.jpg"
   }
 
   let instance;
-
-  let tokenInstance;
+  let xaberInstance;
+  let badgesInstance;
 
   beforeEach(async () => {
-    tokenInstance = await Xaber.deployed()
-    instance = await Employees.new(tokenInstance.address, emptyAddress);
-    await tokenInstance.addMinter(instance.address)
+    xaberInstance = await Xaber.deployed()
+    badgesInstance = await Badges.deployed()
+    instance = await Employees.new(xaberInstance.address, badgesInstance.address, emptyAddress);
+    await xaberInstance.addMinter(instance.address)
+    await xaberInstance.addBurner(instance.address)
+    await badgesInstance.addMinter(instance.address)
   });
 
+  /**
+   * Add a new employee.
+   */
   it("should add a new employee with provided profile", async function () {
-    await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, { from: alice })
+    await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, aliceProfile.image, { from: alice })
 
-    const count = await instance.employeeCount.call()
-
-    assert.equal(
-      count,
-      1,
-      "The number of employee(s) must be 1",
-    );
-
-    const employee = await instance.employees.call(alice)
+    const employee = await instance.getEmployee.call(alice)
 
     assert.equal(
       employee.id,
@@ -57,15 +58,24 @@ contract("Employees", function (accounts) {
     )
 
     assert.equal(
+      employee.image,
+      aliceProfile.image,
+      "the image of employee does not match the expected value",
+    )
+
+    assert.equal(
       employee.email,
       aliceProfile.email,
       "the email of employee does not match the expected value",
     )
   })
 
+  /**
+   * The newly added employee should be initially funded
+   */
   it("should reward the newly-onboarded employee", async function () {
 
-    const beforeOnboardingAmount = await tokenInstance.balanceOf(bob)
+    const beforeOnboardingAmount = await xaberInstance.balanceOf(bob)
 
     assert.equal(
       beforeOnboardingAmount,
@@ -73,47 +83,73 @@ contract("Employees", function (accounts) {
       "The account must start with 0 token",
     );
     
-    await instance.addEmployee(bobProfile.id, bobProfile.name, bobProfile.email, { from: bob })
+    await instance.addEmployee(bobProfile.id, bobProfile.name, bobProfile.email, bobProfile.image, { from: bob })
 
-    const afterOnboardingAmount = await tokenInstance.balanceOf(bob)
+    const afterOnboardingAmount = await xaberInstance.balanceOf(bob)
 
     assert.isTrue(
       afterOnboardingAmount > beforeOnboardingAmount,
-      0,
       "The newly-onboarded employee must be funded",
     );
 
   })
 
+  /**
+   * Attemp to add employee twice with same account
+   */
   it("should error when adding new employee from the same account more than once", async function() {
 
-    await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, { from: alice })
+    await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, aliceProfile.image, { from: alice })
 
-    await catchRevert(instance.addEmployee(bobProfile.id, bobProfile.name, bobProfile.email, { from: alice }));
+    await catchRevert(instance.addEmployee(bobProfile.id, bobProfile.name, bobProfile.email, bobProfile.image, { from: alice }));
   });
 
+  /**
+   * Attemp to add employee twice with same employee id
+   */
   it("should error when adding new employee with duplicated id", async function() {
 
-    await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, { from: alice })
+    await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, aliceProfile.image, { from: alice })
 
-    await catchRevert(instance.addEmployee(aliceProfile.id, bobProfile.name, bobProfile.email, { from: bob }));
+    await catchRevert(instance.addEmployee(aliceProfile.id, bobProfile.name, bobProfile.email, bobProfile.image, { from: bob }));
   });
 
-  it("should emit a LogEmployeeAdded event when an employee is added", async () => {
-    
-    var eventEmitted = false;
+  /**
+   * Redeem the token for a badge
+   */
+     it("should be able to exchange between token and badge", async function() {
 
-    const tx = await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, { from: alice })
+      await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, aliceProfile.image, { from: alice })
+  
+      const badgeId = 1
 
-    if (tx.logs[0].event == "LogEmployeeAdded") {
-      eventEmitted = true;
-    }
+      const aliceAmountBefore = await xaberInstance.balanceOf(alice)
+      const aliceBadgeBefore = await badgesInstance.balanceOf(alice, badgeId)
 
-    assert.equal(
-      eventEmitted,
-      true,
-      "adding an employee should emit a LogEmployeeAdded event",
-    );
-  });
+      assert.equal(
+        aliceBadgeBefore,
+        0,
+        "Employee must not habve any badge initially",
+      );
+
+      await xaberInstance.approve(instance.address, aliceAmountBefore, { from: alice })
+
+      await instance.exchangeBadge(badgeId, { from: alice })
+
+      const aliceAmountAfter = await xaberInstance.balanceOf(alice)
+      const aliceBadgeAfter = await badgesInstance.balanceOf(alice, badgeId)
+
+      assert.isTrue(
+        aliceAmountAfter < aliceAmountBefore,
+        "The employee token must be burnt",
+      );
+
+      assert.equal(
+        aliceBadgeAfter,
+        1,
+        "Employee must hold a badge",
+      );
+
+    });
 
 });

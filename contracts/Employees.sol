@@ -73,7 +73,7 @@ contract Employees is ERC2771Context {
     }
 
     /// @notice Return the employee entry
-    function getEmployees(address account) external view returns (Employee memory) {
+    function getEmployee(address account) external view returns (Employee memory) {
         return employees[account];
     }
     
@@ -90,8 +90,9 @@ contract Employees is ERC2771Context {
     /// @notice Spend XABER token for badge redemption
     function exchangeBadge (uint256 badgeId) public returns (bool) {
         
-        require(tokenContract.allowance(_msgSender(), address(this)) >= badgeExchangeRates[badgeId]);
-        require(tokenContract.balanceOf(_msgSender()) >= badgeExchangeRates[badgeId]);
+        require(tokenContract.allowance(_msgSender(), address(this)) >= badgeExchangeRates[badgeId], "Insufficient allowance to spend token");
+        require(tokenContract.balanceOf(_msgSender()) >= badgeExchangeRates[badgeId], "Insufficient token to exchange");
+        require(badgesContract.balanceOf(_msgSender(), badgeId) == 0, "Allow holding amount only 1 for each badge");
         
         tokenContract.burnFrom(_msgSender(), badgeExchangeRates[badgeId]);
         badgesContract.mint(_msgSender(), badgeId, 1, "");        
