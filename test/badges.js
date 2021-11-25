@@ -3,7 +3,7 @@ const Badges = artifacts.require("Badges")
 const { sender } = require("./senderHelpers.js");
 const { catchRevert } = require("./exceptionsHelpers.js");
 
-contract("badges", function (accounts) {
+contract("Badges", function (accounts) {
 
     const [admin, alice, bob] = accounts
 
@@ -28,7 +28,7 @@ contract("badges", function (accounts) {
     /**
      * Can't mint if has no role
      */
-    it("should not allow to mint by the one without role", async () => {
+    it("should not allow minting by the one without role", async () => {
         await catchRevert(instance.mint(alice, 1, 1, "0x0", await sender(bob)));
     })
 

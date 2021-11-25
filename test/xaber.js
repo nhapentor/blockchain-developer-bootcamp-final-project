@@ -3,7 +3,7 @@ const XABER = artifacts.require("XABER")
 const { sender } = require("./senderHelpers.js");
 const { catchRevert } = require("./exceptionsHelpers.js");
 
-contract("xaber", function (accounts) {
+contract("XABER", function (accounts) {
 
     const [admin, alice, bob] = accounts
 
@@ -42,7 +42,7 @@ contract("xaber", function (accounts) {
     /**
      * Can't mint if has no role
      */
-    it("should not allow to mint by the one without role", async () => {
+    it("should not allow minting by the one without role", async () => {
         await catchRevert(instance.mint(alice, amount, await sender(bob)));
     })
 
@@ -72,7 +72,7 @@ contract("xaber", function (accounts) {
     /**
      * Can't burn if has no role
      */
-    it("should not allow to burn by the one without role", async () => {
+    it("should not allow burning by the one without role", async () => {
 
         await instance.mint(bob, amount, await sender(admin))
 
