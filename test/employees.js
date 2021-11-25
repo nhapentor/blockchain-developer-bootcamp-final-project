@@ -2,6 +2,7 @@ const Employees = artifacts.require("Employees");
 const Xaber = artifacts.require("Xaber");
 const Badges = artifacts.require("Badges")
 
+const { sender } = require("./senderHelpers.js");
 const { catchRevert } = require("./exceptionsHelpers.js");
 
 contract("Employees", function (accounts) {
@@ -29,19 +30,19 @@ contract("Employees", function (accounts) {
   let badgesInstance;
 
   beforeEach(async () => {
-    xaberInstance = await Xaber.deployed()
-    badgesInstance = await Badges.deployed()
-    instance = await Employees.new(xaberInstance.address, badgesInstance.address, emptyAddress);
-    await xaberInstance.addMinter(instance.address)
-    await xaberInstance.addBurner(instance.address)
-    await badgesInstance.addMinter(instance.address)
+    xaberInstance = await Xaber.new(emptyAddress, await sender(admin))
+    badgesInstance = await Badges.new(await sender(admin))
+    instance = await Employees.new(xaberInstance.address, badgesInstance.address, emptyAddress, await sender(admin));
+    await xaberInstance.addMinter(instance.address, await sender(admin))
+    await xaberInstance.addBurner(instance.address, await sender(admin)) 
+    await badgesInstance.addMinter(instance.address, await sender(admin))
   });
 
   /**
    * Add a new employee.
    */
   it("should add a new employee with provided profile", async function () {
-    await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, aliceProfile.image, { from: alice })
+    await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, aliceProfile.image, await sender(alice))
 
     const employee = await instance.getEmployee.call(alice)
 
@@ -83,7 +84,7 @@ contract("Employees", function (accounts) {
       "The account must start with 0 token",
     );
     
-    await instance.addEmployee(bobProfile.id, bobProfile.name, bobProfile.email, bobProfile.image, { from: bob })
+    await instance.addEmployee(bobProfile.id, bobProfile.name, bobProfile.email, bobProfile.image, await sender(bob))
 
     const afterOnboardingAmount = await xaberInstance.balanceOf(bob)
 
@@ -99,9 +100,9 @@ contract("Employees", function (accounts) {
    */
   it("should error when adding new employee from the same account more than once", async function() {
 
-    await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, aliceProfile.image, { from: alice })
+    await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, aliceProfile.image, await sender(alice))
 
-    await catchRevert(instance.addEmployee(bobProfile.id, bobProfile.name, bobProfile.email, bobProfile.image, { from: alice }));
+    await catchRevert(instance.addEmployee(bobProfile.id, bobProfile.name, bobProfile.email, bobProfile.image, await sender(alice)))
   });
 
   /**
@@ -109,47 +110,47 @@ contract("Employees", function (accounts) {
    */
   it("should error when adding new employee with duplicated id", async function() {
 
-    await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, aliceProfile.image, { from: alice })
+    await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, aliceProfile.image,  await sender(alice))
 
-    await catchRevert(instance.addEmployee(aliceProfile.id, bobProfile.name, bobProfile.email, bobProfile.image, { from: bob }));
+    await catchRevert(instance.addEmployee(aliceProfile.id, bobProfile.name, bobProfile.email, bobProfile.image,  await sender(bob)))
   });
 
   /**
    * Redeem the token for a badge
    */
-     it("should be able to exchange between token and badge", async function() {
+  it("should be able to exchange between token and badge", async function() {
 
-      await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, aliceProfile.image, { from: alice })
-  
-      const badgeId = 1
+    await instance.addEmployee(aliceProfile.id, aliceProfile.name, aliceProfile.email, aliceProfile.image,  await sender(alice))
 
-      const aliceAmountBefore = await xaberInstance.balanceOf(alice)
-      const aliceBadgeBefore = await badgesInstance.balanceOf(alice, badgeId)
+    const badgeId = 2
 
-      assert.equal(
-        aliceBadgeBefore,
-        0,
-        "Employee must not habve any badge initially",
-      );
+    const aliceAmountBefore = await xaberInstance.balanceOf(alice)
+    const aliceBadgeBefore = await badgesInstance.balanceOf(alice, badgeId)
 
-      await xaberInstance.approve(instance.address, aliceAmountBefore, { from: alice })
+    assert.equal(
+      aliceBadgeBefore,
+      0,
+      "Employee must not habve any badge initially",
+    );
 
-      await instance.exchangeBadge(badgeId, { from: alice })
+    await xaberInstance.approve(instance.address, aliceAmountBefore,  await sender(alice))
 
-      const aliceAmountAfter = await xaberInstance.balanceOf(alice)
-      const aliceBadgeAfter = await badgesInstance.balanceOf(alice, badgeId)
+    await instance.exchangeBadge(badgeId,  await sender(alice))
 
-      assert.isTrue(
-        aliceAmountAfter < aliceAmountBefore,
-        "The employee token must be burnt",
-      );
+    const aliceAmountAfter = await xaberInstance.balanceOf(alice)
+    const aliceBadgeAfter = await badgesInstance.balanceOf(alice, badgeId)
 
-      assert.equal(
-        aliceBadgeAfter,
-        1,
-        "Employee must hold a badge",
-      );
+    assert.isTrue(
+      aliceAmountAfter < aliceAmountBefore,
+      "The employee token must be burnt",
+    );
 
-    });
+    assert.equal(
+      aliceBadgeAfter,
+      1,
+      "Employee must hold a badge",
+    );
+
+  });
 
 });
