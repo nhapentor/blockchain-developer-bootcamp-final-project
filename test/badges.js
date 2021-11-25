@@ -42,7 +42,7 @@ contract("badges", function (accounts) {
     /**
      * Minter can mint
      */
-        it("should not allow minter to mint", async () => {
+        it("should allow minter to mint", async () => {
         
         await instance.addMinter(bob, await sender(admin))
         await instance.mint(bob, 1, 1, "0x0", await sender(bob))
