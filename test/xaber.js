@@ -1,4 +1,4 @@
-const XABER = artifacts.require("XABER")
+const Xaber = artifacts.require("XABER")
 
 const { sender } = require("./senderHelpers.js");
 const { catchRevert } = require("./exceptionsHelpers.js");
@@ -12,7 +12,7 @@ contract("XABER", function (accounts) {
     const emptyAddress = "0x0000000000000000000000000000000000000000";
 
     beforeEach(async () => {
-        instance = await XABER.new(emptyAddress, await sender(admin))
+        instance = await Xaber.new(emptyAddress, await sender(admin))
     });
 
     /**

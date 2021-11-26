@@ -59,6 +59,8 @@ contract Discussion is Ownable, ERC2771Context {
     
     /// @notice When owner approve the reply, the token rewards to the replier
     function approveReply(uint256 replyIndex) external onlyOwner returns (bool) {
+
+        require(replies[replyIndex].replier != super.owner());
         
         isClosed = true;
         approvedReply = replyIndex;
