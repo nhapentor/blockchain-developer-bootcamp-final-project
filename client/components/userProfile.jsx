@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import { useWeb3React } from "@web3-react/core"
 import { getEmployeesContract, getTokenContract, getBadgesContract } from '../lib/getContracts'
 
-const UserProfile = () => {
+const UserProfile = ({setLoading}) => {
 
     const [user, setUser] = useState({})
     const [badgeList, setBadgeList] = useState([])
@@ -19,6 +19,10 @@ const UserProfile = () => {
             await getEmployee()
             await getBadges()
             setLoaded(true)
+
+            if (setLoading) {
+                setLoading(false)
+            }
         }
 
     }, [active])
@@ -102,7 +106,7 @@ const UserProfile = () => {
                     </p>
                     
                 </div>
-                <div className="col-4 pr-0 py-1 bg-white text-center" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                <div className="col-4 pr-0 py-1 bg-white text-center" style={{ display: "flex", flexDirection: "column", justifyContent: "center", borderRadius: "0px 8px 8px 0px" }}>
                     <div className="row">
                         {
                             badgeList.sort((x, y) => x.id > y.id ? 1 : -1).map((b, idx) => {

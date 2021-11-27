@@ -35,7 +35,7 @@ export default () => {
             const employeeContract = await getEmployeesContract(library) 
 
             const ownerAddress = await disscussionConstract.methods.owner().call({ from: account })
-            const employee = await employeeContract.methods.employees(ownerAddress).call({ from: account })
+            const employee = await employeeContract.methods.getEmployee(ownerAddress).call({ from: account })
 
             const discusstion = {
                 index,

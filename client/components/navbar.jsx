@@ -3,10 +3,9 @@ import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 import { useWeb3React } from "@web3-react/core"
 import { injected } from "./wallet/connectors"
-import { updateEmployeeSignature } from '../lib/api';
 import { getEmployeesContract } from '../lib/getContracts';
 
-const Navbar = ({ employee }) => {
+const Navbar = () => {
 
   const t = useTranslations()
   const router = useRouter()
@@ -15,7 +14,7 @@ const Navbar = ({ employee }) => {
 
   const [ profile, setProfile ]  = useState({
     account: '',
-    employeeId: 0
+    isOnboarded: false
   })
 
   const [isActive, setActive] = useState(active)
@@ -30,17 +29,30 @@ const Navbar = ({ employee }) => {
 
     if (isActive) {
 
-      let employeeId = employee ? employee.id : 0
+      const employeesContract = await getEmployeesContract(library)
+      const employee = await employeesContract.methods.getEmployee(account).call({ from: account })
+      let isAuhtenticated = false
 
-      if (!employeeId) {
-        const employeesContract = await getEmployeesContract(library)
-        const e = await employeesContract.methods.getEmployee(account).call({ from: account })        
-        employeeId = e.id
-      }      
-  
+      const signedMessage = (() => {
+        if (window.localStorage.getItem("signedMessage")) {
+          return JSON.parse(window.localStorage.getItem("signedMessage"))
+        } else {
+          return undefined
+        }
+      })()
+
+      if (signedMessage && signedMessage.signature && signedMessage.timestamp) {
+        library.eth.personal.ecRecover(t('Message to be signed', { timestamp: signedMessage.timestamp }), signedMessage.signature)
+          .then((acc) => {
+            (async () => {
+              isAuhtenticated = true
+            })()
+          })
+      }
+
       setProfile({
-        account,      
-        employeeId        
+        account
+
       })
     }
 
@@ -50,6 +62,7 @@ const Navbar = ({ employee }) => {
     try {
       await activate(injected)
       window.localStorage.setItem('connectorIdv2', 'injected')
+      window.localStorage.setItem('signature', JSON.stringify({ message: "zczc", nonce: 123 }))
     } catch (ex) {
       console.log(ex)
     }
@@ -59,7 +72,7 @@ const Navbar = ({ employee }) => {
     try {
       deactivate()
       window.localStorage.removeItem('connectorIdv2')
-      await updateEmployeeSignature(profile.employeeId, '', 0)
+      window.localStorage.removeItem('signedMessage')
       router.push("/")
     } catch (ex) {
       console.log(ex)
@@ -88,9 +101,14 @@ const Navbar = ({ employee }) => {
                   {`${profile.account.slice(0, 5)}...${profile.account.slice(-4)}`}
                 </a>
                 <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarScrollingDropdown">
-                  <li><a className="dropdown-item" href={`/employees/${account}/transfer`}>Transfer</a></li>
-                  <li><a className="dropdown-item" href={`/redemption`}>Redeem Badges</a></li>
-                  <li><hr className="dropdown-divider" /></li>
+                  {profile.isOnboarded && 
+                    <>
+                      <li><a className="dropdown-item" href={`/employees/${account}/transfer`}>Transfer</a></li>
+                      <li><a className="dropdown-item" href={`/redemption`}>Redeem Badges</a></li>
+
+                      <li><hr className="dropdown-divider" /></li>
+                    </>
+                  }
                   <li><a onClick={() => disconnect()} className="dropdown-item">{t('Disconnect Wallet')}</a></li>
                 </ul>
               </li>
