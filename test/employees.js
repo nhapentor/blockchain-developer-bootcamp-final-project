@@ -1,5 +1,5 @@
 const Employees = artifacts.require("Employees");
-const Xaber = artifacts.require("Xaber");
+const Xaber = artifacts.require("XABER");
 const Badges = artifacts.require("Badges")
 
 const { sender } = require("./senderHelpers.js");

@@ -1,5 +1,5 @@
 const Discussion = artifacts.require("Discussion");
-const Xaber = artifacts.require("Xaber");
+const Xaber = artifacts.require("XABER");
 
 const { sender } = require("./senderHelpers.js");
 const { catchRevert } = require("./exceptionsHelpers.js");
