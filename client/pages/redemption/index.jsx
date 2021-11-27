@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useWeb3React } from "@web3-react/core"
 import UserProfile from '../../components/userProfile'
 import getGsnProvider from '../../lib/getRelayProvider'
+import LoadingPage from '../../components/loader'
+import ErrorAlert from '../../components/errorAlert'
 import { 
     getTokenContract, 
     getBadgesContract,     
@@ -17,10 +19,16 @@ export default () => {
 
   const [ balance, setBalance ] = useState(0)
 
+  const [processing, setProcessing] = useState(false)
+  const [pageLoading, setPageLoading] = useState(true)
+  const [errMsg, setErrMsg] = useState("")
+
+
   useEffect(async () => {
     if (active && account) {
         await getAllBadges()
         await getTokenData()
+        setPageLoading(false)
     }
 
   }, [active, account])
@@ -71,7 +79,8 @@ export default () => {
                 id: metadata.id,
                 name: metadata.name,
                 imageUrl: metadata.image,
-                exchangeRate: library.utils.fromWei(exchangeRateInWei)
+                exchangeRate: library.utils.fromWei(exchangeRateInWei),
+                isOwn: Number(await badgeContract.methods.balanceOf(account, badgeId).call({ from: account})) > 0
             }
 
             setBadgeList( prev => [...prev, badge])
@@ -81,28 +90,48 @@ export default () => {
 
   const onApproveAmountClicked = async (amount) => {
 
-    const gsnWeb3 = await getGsnProvider()
-    const tokenContract = await getTokenContract(gsnWeb3)
-    const employeeContract = await getEmployeesContract(library)
+    setErrMsg("")
+    setProcessing(true)
 
-    await tokenContract.methods.approve(employeeContract.options.address, library.utils.toWei((amount).toString())).send({from: account, gasPrice: '20000000000' })
-    await getTokenData()
+    try {
+        const gsnWeb3 = await getGsnProvider()
+        const tokenContract = await getTokenContract(gsnWeb3)
+        const employeeContract = await getEmployeesContract(library)
+
+        await tokenContract.methods.approve(employeeContract.options.address, library.utils.toWei((amount).toString())).send({from: account, gasPrice: '20000000000' })
+        await getTokenData()
+    } catch (err) {
+        setErrMsg(err.message)
+    }
+
+    setProcessing(false)
   }
 
   const onRedeemClicked = async (badgeId) => {
 
-    const gsnWeb3 = await getGsnProvider()
-    const employeeContract = await getEmployeesContract(gsnWeb3)
+    setErrMsg("")
+    setProcessing(true)
 
-    await employeeContract.methods.exchangeBadge(badgeId).send({from: account, gasPrice: '20000000000' })
+    try {
+        const gsnWeb3 = await getGsnProvider()
+        const employeeContract = await getEmployeesContract(gsnWeb3)
+    
+        await employeeContract.methods.exchangeBadge(badgeId).send({from: account, gasPrice: '20000000000' })
+
+        window.location.reload(false)
+    } catch (err) {
+        setErrMsg(err.message)
+        setProcessing(false)
+    }
   }
 
   return (    
       <div className="container">
-          {active && <>
+          {active && !pageLoading && <>
               <UserProfile />
               <div className="row justify-content-center mt-3">
                   <div className="col-6 bg-white p-0" style={{ borderRadius: "8px" }} >
+                    <ErrorAlert errMsg={errMsg} setErrMsg={setErrMsg} />
                     <div className="card-header">
                         <strong className="card-title">Redeem your XABER</strong>
                         </div>
@@ -124,7 +153,7 @@ export default () => {
                                                           </div>
                                                           <div>
                                                           {
-                                                              balance >= Number(b.exchangeRate) && (
+                                                              !b.isOwn && balance >= Number(b.exchangeRate) && (
                                                                   <>
                                                                       {       
                                                                           <button className="btn btn-sm btn-gra float-end" disabled={balance < Number(b.exchangeRate) || allowance < Number(b.exchangeRate)} onClick={() => onRedeemClicked(b.id)}>Redeem</button>
@@ -133,6 +162,12 @@ export default () => {
                                                                           allowance < Number(b.exchangeRate) && (<button className="mx-2 btn btn-sm btn-outline-sec float-end" onClick={() => onApproveAmountClicked(b.exchangeRate)}>Approve</button>)
                                                                       }
                                                                   </>)
+                                                          }
+                                                          {
+                                                              b.isOwn &&
+                                                              <>                                                                  
+                                                                  <p className="text-muted text-end">You already have this one!</p>
+                                                              </>
                                                           }
                                                           {
                                                               balance < Number(b.exchangeRate) &&
@@ -154,6 +189,7 @@ export default () => {
               </div>
           </>
           }
+        { (processing || pageLoading) && <LoadingPage /> }
       </div>
   )
 

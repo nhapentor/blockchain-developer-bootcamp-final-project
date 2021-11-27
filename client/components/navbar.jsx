@@ -31,7 +31,6 @@ const Navbar = () => {
 
       const employeesContract = await getEmployeesContract(library)
       const employee = await employeesContract.methods.getEmployee(account).call({ from: account })
-      let isAuhtenticated = false
 
       const signedMessage = (() => {
         if (window.localStorage.getItem("signedMessage")) {
@@ -45,14 +44,18 @@ const Navbar = () => {
         library.eth.personal.ecRecover(t('Message to be signed', { timestamp: signedMessage.timestamp }), signedMessage.signature)
           .then((acc) => {
             (async () => {
-              isAuhtenticated = true
+              if (acc !== account.toLowerCase()) {
+                router.push("/")
+              }
             })()
           })
+      } else {
+        router.push("/")
       }
 
       setProfile({
-        account
-
+        account,
+        isOnboarded: Number(employee.id) !== 0
       })
     }
 

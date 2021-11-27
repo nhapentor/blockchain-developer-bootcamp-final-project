@@ -1,10 +1,12 @@
-import { useState, useEffect} from 'react';
-import { useWeb3React } from '@web3-react/core';
+import { useState, useEffect} from 'react'
+import { useWeb3React } from '@web3-react/core'
 import { Typeahead } from 'react-bootstrap-typeahead'
 import getGsnProvider from '../../../lib/getRelayProvider'
-import { getTokenContract } from '../../../lib/getContracts';
+import { getTokenContract } from '../../../lib/getContracts'
 import { getAllEmployees } from '../../../lib/api'
 import UserProfile from '../../../components/userProfile'
+import LoadingPage from '../../../components/loader'
+import ErrorAlert from '../../../components/errorAlert'
 
 export default ({ employees }) => {
 
@@ -20,8 +22,13 @@ export default ({ employees }) => {
     const { active, account, library } = useWeb3React()
 
 
+    const [processing, setProcessing] = useState(false)
+    const [pageLoading, setPageLoading] = useState(true)
+    const [errMsg, setErrMsg] = useState("")
+
     useEffect(async () => {
         setActive(active && account)
+        setPageLoading(false)
     }, [active, account])
 
     useEffect(async () => {
@@ -49,11 +56,20 @@ export default ({ employees }) => {
 
     const onSubmitClicked = async () => {
 
-        const gsnWeb3 = await getGsnProvider()        
-        const tokenContract = await getTokenContract(gsnWeb3)
-        await tokenContract.methods.transfer(library.utils.toChecksumAddress(colleague[0].account), library.utils.toWei(amount.toString())).send({ from: account, gasPrice: '20000000000' })
+        setErrMsg("")
+        setProcessing(true)
 
-        window.location.assign(`/employees/${account}`)
+        try {
+
+            const gsnWeb3 = await getGsnProvider()        
+            const tokenContract = await getTokenContract(gsnWeb3)
+            await tokenContract.methods.transfer(library.utils.toChecksumAddress(colleague[0].account), library.utils.toWei(amount.toString())).send({ from: account, gasPrice: '20000000000' })
+    
+            window.location.assign(`/employees/${account}`)
+        } catch (err) {
+            setErrMsg(err.message)
+            setProcessing(false)
+        }
     }
 
     const onNextStep = () => {
@@ -67,10 +83,11 @@ export default ({ employees }) => {
     return (
         <>
         <div className="container">
-        {active && <>
-                    <UserProfile />
+        {active && !pageLoading && <>
+                    <UserProfile setLoading={setPageLoading} />
                     <div className="row justify-content-center">                            
                                 <div className="col-6 text-center p-0 mt-3 mb-2">
+                                    <ErrorAlert errMsg={errMsg} setErrMsg={setErrMsg} />
                                     <div className="card px-0 py-0 mt-3 mb-3">
                                         <div className="card-header">Send XABER to your colleague</div>
 
@@ -155,7 +172,7 @@ export default ({ employees }) => {
                     
           }
         </div>
-
+        { (processing || pageLoading) && <LoadingPage /> }
         </>
     )
 

@@ -267,12 +267,12 @@ const EmployeePage = ({ employee }) => {
                                                                 )
                                                             })
                                                         }
-                                                            <>
-                                                                <div className="card-body">
-                                                                    { discussionCount === 0 && <p>No discussions....</p> }
-                                                                    { discussionCount !== discussionList.length && <p>Loading....</p> }
-                                                                </div>
-                                                            </>
+                                                        {   discussionCount === 0 &&
+                                                            <div className="card-body"><p>No discussions....</p></div>
+                                                        }
+                                                        {   discussionCount !== discussionList.length&&
+                                                            <div className="card-body"><p>Loading....</p></div>
+                                                        }
                                                     
                                                 </div>
                                             </div>
