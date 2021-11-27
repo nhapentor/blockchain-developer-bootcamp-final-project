@@ -34,14 +34,6 @@ async function fetchAPI(query, { variables } = {}) {
         account
         name
         email
-        signature
-        timestamp
-        points
-        avatar { 
-          id
-          url
-        }
-        isOnboarded
       }
     }
     `,
@@ -57,8 +49,6 @@ async function fetchAPI(query, { variables } = {}) {
       employees(where: $where) {
         id            
         account
-        signature
-        timestamp
       }
     }
     `,
@@ -73,35 +63,6 @@ async function fetchAPI(query, { variables } = {}) {
     return data?.employees[0]
   }
 
-  export async function searchEmployeeByName(keyword) {
-    const data = await fetchAPI(
-      `
-    query EmployeeNameContain($where: JSON) {
-      employees(where: $where) {
-        id            
-        account
-        timestamp
-        points
-        avatar { 
-          id
-          url
-        }
-        isOnboarded
-      }
-    }
-    `,
-      {
-        variables: {
-          where: { 
-            name_contains: keyword
-          },
-        },
-      }
-    )
-
-    return data?.employees
-  }
-
   export async function createEmployee(employee) {
     const data = await fetchAPI(
       `
@@ -111,8 +72,6 @@ async function fetchAPI(query, { variables } = {}) {
           employee {
             id            
             account
-            signature
-            timestamp
           }
         }
       }
@@ -130,7 +89,7 @@ async function fetchAPI(query, { variables } = {}) {
   export async function updateEmployee(employee) {
 
     const id = Number(employee.id)
-    const input = {...employee, id: undefined, avatar: Number(employee.avatar.id) } 
+    const input = {...employee, id: undefined } 
 
     const data = await fetchAPI(
       `
@@ -140,17 +99,9 @@ async function fetchAPI(query, { variables } = {}) {
           data: $employee }) {
           employee {
             id
-            avatar { 
-              id
-              url  
-            }
             account
             name
             email
-            signature
-            timestamp
-            points
-            isOnboarded
           }
         }
       }
@@ -179,16 +130,9 @@ async function fetchAPI(query, { variables } = {}) {
           data: $employee }) {
           employee {
             id
-            avatar { 
-              id
-              url  
-            }
             account
             name
             email
-            signature
-            timestamp
-            points
           }
         }
       }

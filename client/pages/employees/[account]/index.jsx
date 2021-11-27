@@ -1,4 +1,4 @@
-import { getEmployeeByAccount, createEmployee, updateEmployee, updateEmployeeSignature, uploadMedia } from '../../../lib/api'
+import { getEmployeeByAccount, createEmployee, updateEmployee, uploadMedia } from '../../../lib/api'
 import { useTranslations } from 'next-intl'
 import { useWeb3React } from "@web3-react/core"
 import { useEffect, useState, useLayoutEffect, useRef } from 'react'
@@ -152,7 +152,7 @@ const EmployeePage = ({ employee }) => {
 
             const media = await uploadMedia(avatarImage)
 
-            const data = { id: employee.id, name: employee.name, email: employee.email, avatar: { id: media.id }, isOnboarded: true }
+            const data = { id: employee.id, name: employee.name, email: employee.email }
 
 
             const gsnWeb3 = await getGsnProvider()

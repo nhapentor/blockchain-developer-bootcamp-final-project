@@ -14,7 +14,7 @@ contract Badges is ERC1155, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     /// @dev The URI supplied to ERC1155 constructor will be overridden 
-    constructor() ERC1155("https://bafybeia53cjlllo2bg7hp4tufqrqfickthxgrrxaser6whxammh3mzcyli.ipfs.dweb.link/{id}.json") {
+    constructor() ERC1155("https://bafybeiegqir22tit4zh3kry2cyq2cx3m42elp626qddfsyyofiql7jzrxy.ipfs.dweb.link/{id}.json") {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(MINTER_ROLE, _msgSender());
     }
@@ -23,7 +23,7 @@ contract Badges is ERC1155, AccessControl {
     function uri(uint256 tokenId) override public pure returns (string memory) {
         return (
             string(abi.encodePacked(
-                "https://bafybeia53cjlllo2bg7hp4tufqrqfickthxgrrxaser6whxammh3mzcyli.ipfs.dweb.link/",
+                "https://bafybeiegqir22tit4zh3kry2cyq2cx3m42elp626qddfsyyofiql7jzrxy.ipfs.dweb.link/",
                 Strings.toString(tokenId),
                 ".json"))
         );

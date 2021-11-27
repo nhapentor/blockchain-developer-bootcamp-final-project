@@ -49,8 +49,6 @@ const Navbar = () => {
               }
             })()
           })
-      } else {
-        router.push("/")
       }
 
       setProfile({
