@@ -24,7 +24,9 @@ contract DiscussionBoard is ERC2771Context {
     /// @notice Initiate a new discussion with the given arguments
     /// @dev Deploy a new Discussion contract instance
     function createDiscussion(string memory title, string memory description, uint256 rewardAmount) public {
-    
+
+        require(rewardAmount > 0);
+                
         Discussion newDiscussion = new Discussion(title, description, address(token), trustedForwarder);
         newDiscussion.transferOwnership(_msgSender());
 
