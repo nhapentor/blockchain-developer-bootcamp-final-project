@@ -13,7 +13,7 @@ const resolveWeb3 = async (resolve) => {
     const chainId = await web3.eth.getChainId()
 
     const gsnConfig = {    
-      preferredRelays: chainId === 4 ? [process.env.NEXT_PUBLIC_GSN_RELAYER] : [],
+      preferredRelays: chainId === 4 ? [process.env.NEXT_PUBLIC_RINKEBY_GSN_RELAYER] : [],
       relayLookupWindowBlocks: 600000,
       paymasterAddress: chainId === 4 ? process.env.NEXT_PUBLIC_RINKEBY_PAYMASTER_ADDRESS : require('../../build/gsn/Paymaster.json').address
     }

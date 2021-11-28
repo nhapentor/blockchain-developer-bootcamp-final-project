@@ -12,7 +12,7 @@ module.exports = {
       network_id: '*' // Match any network id
     },
     rinkeby: {provider: () =>
-      new HDWalletProvider(process.env.MNEMONIC, "https://rinkeby.infura.io/v3/c41b2f4fea7f413ab342dd5a20d5f9e6", 0, 3),
+      new HDWalletProvider(process.env.MNEMONIC, process.env.RINKEBY_ENDPOINT_URL, 0, 3),
       network_id: '4' // Match any network id
     }
   },
