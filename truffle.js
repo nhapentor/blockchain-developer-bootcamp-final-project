@@ -13,7 +13,8 @@ module.exports = {
     },
     rinkeby: {provider: () =>
       new HDWalletProvider(process.env.MNEMONIC, process.env.RINKEBY_ENDPOINT_URL, 0, 3),
-      network_id: '4' // Match any network id
+      network_id: '4',
+      skipDryRun: true
     }
   },
   compilers: {
