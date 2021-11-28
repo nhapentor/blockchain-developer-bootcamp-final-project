@@ -6,7 +6,7 @@
 
 ## Inheritance and Interfaces
 
-- Most smart contracts in this project inherit from one or more smart contracts from `OpenZeppelin` smart contract library. Besides
+- Most smart contracts in this project inherit from one or more smart contracts from `OpenZeppelin` smart contract library. Besides, due to the uses of GSN, some smart contracts also inherit from `OpenGSN` library
 
 ## Access Control Design Patterns
 
