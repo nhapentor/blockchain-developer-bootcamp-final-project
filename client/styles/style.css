@@ -163,7 +163,7 @@ select { background: none; }
   background: linear-gradient(92.82deg, #ff409a 2.03%, #ad49fb 57.42%, #6331d1 99.85%);
   border-radius: 5px;
   border: none;
-  color: white;
+  color: white !important;
   position: relative;
   font-weight: 600;
 }
