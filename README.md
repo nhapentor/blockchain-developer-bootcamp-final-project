@@ -38,6 +38,14 @@ With the token-based reward points, it gives more flexibility for employees to m
 - Ganache CLI v6.12.2
 - Truffle and Ganache
 
+### Directory Structure
+
+1. `client`: Next.js web frontend.
+2. `contracts`: Solidity Smart Contracts.
+3. `migrations`: Migration files for truffle to deploy smart contracts to an Ethereum network.
+3. `test`: Unittests for smart contracts.
+4. `build`: The directory for smart contracts' artifacts after compiling and from _GSN_
+
 ### Smart Contracts and GSN
 
 To avoid issues, please follow the steps accordingly as some steps are depent on the prior ones.
@@ -89,6 +97,6 @@ If eligible, please send the certification to this Ethereum EOA address
 ## Future Features
 
 - More engagement activities to earn token
-- Apply Gamifications e.g. ranking system
-- Search and see and interact with other users' profile for encourage social connection
-- More... 
+- Apply more gamifications, e.g. ranking system, to drive engagement
+- Search and view and interact with other users for encourage social connection
+- More...
