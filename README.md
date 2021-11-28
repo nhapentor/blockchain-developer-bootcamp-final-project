@@ -14,9 +14,11 @@ With the token-based reward points, it gives more flexibility for employees to m
 2. To interact with the demo dApps using _MetaMask_, users don't have to pay for any gas but it requires to have the Ether balance in the users' accounts though.
 3. Due to the _GSN_ architecture, the users' transactions are forwarded to the <a href="https://relays.opengsn.org/" target="_blank">Relay Servers</a>, therefore it takes quite long to transact the requests. _Please be patien_ :)
 
-**URL:** https://employee-engagement.sslabs.sh
+**URL:** 
+https://employee-engagement.sslabs.sh
 
 **Screencast URL:** 
+https://public.bl.files.1drv.com/y4mrs8YxNoBAjNXmdNix9tCCcCQs_kOlVzZxT9WhI6anRZj64EZ_oQjkq-o-e2dRfkb2SRHOrSmz9ZXqSHcnCXw_arYjbXPUYLgjL7iBCJy3TwN35RM6HHku_zfo8Ix5jvlUn0a6I2YlT4r0zJBEAZGAn1GHpNWsUAnzTRlyvVne98iYq3L9psF2ecx4bvUw4SQnzbyxPOl6GVgNIdsfV6CSg/Screen%20Recording%202021-11-28%20at%207.21.51%20PM.mp4?psid=1
 
 ### Simple Workflow
 1. Enter the service platform
@@ -86,7 +88,6 @@ NEXT_PUBLIC_RINKEBY_GSN_RELAYER=https://rk22-relayer​.sslabs​.sh/gsn1
 ```
 - `NEXT_PUBLIC_STRAPI_BACKEND` is the backend required both running locally or test network, e.g. store data off-chain as well as images. The pre-configured here should work with every environment
 - `NEXT_PUBLIC_RINKEBY_PAYMASTER_ADDRESS` is the address of _GSN's paymaster_ contract which take responsibilities to pay gas fees instead of users
-- `NEXT_PUBLIC_RINKEBY_PAYMASTER_ADDRESS` is the endpoint for HDWalletProvider, it's required to connect to Rinkeby Test Network when deploying smart contracts
 - `NEXT_PUBLIC_RINKEBY_GSN_RELAYER` is the _GSN relay server_ setup for _Rinkeby_Test_Network_, it can be leave as is
 
 ## My Public Ethereum Wallet for Certification:

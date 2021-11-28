@@ -104,8 +104,6 @@ contract Employees is ERC2771Context {
     validateExchangeCriterias(_msgSender(), badgeId)
     returns (bool) 
     {
-        
-
         tokenContract.burnFrom(_msgSender(), badgeExchangeRates[badgeId]);
         badgesContract.mint(_msgSender(), badgeId, 1, "");        
         employees[_msgSender()].badges.push(badgeId);
