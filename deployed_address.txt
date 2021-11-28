@@ -1,0 +1,18 @@
+Network: Rinkeby
+================
+
+// This contract is deployed by OpenGSN - https://docs.opengsn.org/contracts/addresses.html#ethereum
+FORWARDER: 0x83A54884bE4657706785D7309cf46B58FE5f6e8a
+
+// This contract is manually pre-deployed, pre-configured and pre-funded for fees payment so the user does not have to pay fees 
+WhitelistPaymaster: 0xB0B8452a4fa8E58b318001A49D035C8689FaB083
+
+XABER: 0x054B1Be6953826e1D899218744D7A5ECD2420f60
+Badges: 0x46578090E50bb25c3a65972D185fc1c3d6fD906b
+DiscussionBoard: 0x4Aa8ca34f016Ab3A5d36248a74467BE69d62Eaa0
+Employees: 0x539c6689d2e4F7F04222B06BF435C361B0b9bb94
+
+Note:
+=====
+A new Discussion contract instance is deployed by DiscussionBoard contract for each new discussion created
+
