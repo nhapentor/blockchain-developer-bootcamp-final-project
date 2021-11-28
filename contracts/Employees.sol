@@ -7,6 +7,9 @@ import "./Employee.sol";
 
 import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 
+/// @title A smart contract for main interactions with employees
+/// @author Samphan Pojanasophanakul
+/// @notice Handle employee records and redemption of badges
 contract Employees is ERC2771Context {    
     
     uint256 private constant NOOB = 1;
@@ -27,10 +30,18 @@ contract Employees is ERC2771Context {
     mapping(address => Employee) private employees;
     mapping(uint256 => bool) private employeeIds;
 
-    modifier doesNotExist(uint256 _id, address _address)  {
-        require(_id > 0 && !employeeIds[_id]  && employees[_address].id == 0);
+    modifier mustNotExist(uint256 _id, address _address)  {
+        require(_id > 0 && !employeeIds[_id]  && employees[_address].id == 0, "Employee with this account already exists");
         _;
     }
+        
+    modifier validateExchangeCriterias(address _buyer, uint256 badgeId)  {
+        require(tokenContract.allowance(_buyer, address(this)) >= badgeExchangeRates[badgeId], "Insufficient allowance to spend token");
+        require(tokenContract.balanceOf(_buyer) >= badgeExchangeRates[badgeId], "Insufficient token to exchange");
+        require(badgesContract.balanceOf(_buyer, badgeId) == 0, "Allow holding amount only 1 for each badge");
+        _;
+    }
+
 
     event LogEmployeeAdded(uint256 id, string name, string email);
     
@@ -56,7 +67,7 @@ contract Employees is ERC2771Context {
     /// @dev Store mapping of sender address to the employee entry and keep track of employee id in array
     function addEmployee(uint256 _id, string memory _name, string memory _email, string memory _image) 
     public 
-    doesNotExist(_id, _msgSender()) returns (bool) 
+    mustNotExist(_id, _msgSender()) returns (bool) 
     {        
         Employee storage newEmployee = employees[_msgSender()];
         newEmployee.id = _id;
@@ -88,12 +99,13 @@ contract Employees is ERC2771Context {
     }
     
     /// @notice Spend XABER token for badge redemption
-    function exchangeBadge (uint256 badgeId) public returns (bool) {
+    function exchangeBadge (uint256 badgeId) 
+    public 
+    validateExchangeCriterias(_msgSender(), badgeId)
+    returns (bool) 
+    {
         
-        require(tokenContract.allowance(_msgSender(), address(this)) >= badgeExchangeRates[badgeId], "Insufficient allowance to spend token");
-        require(tokenContract.balanceOf(_msgSender()) >= badgeExchangeRates[badgeId], "Insufficient token to exchange");
-        require(badgesContract.balanceOf(_msgSender(), badgeId) == 0, "Allow holding amount only 1 for each badge");
-        
+
         tokenContract.burnFrom(_msgSender(), badgeExchangeRates[badgeId]);
         badgesContract.mint(_msgSender(), badgeId, 1, "");        
         employees[_msgSender()].badges.push(badgeId);

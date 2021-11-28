@@ -19,7 +19,7 @@ contract Badges is ERC1155, AccessControl {
         _setupRole(MINTER_ROLE, _msgSender());
     }
     
-    /// @notice Return the metadata URI for the given `tokenId` 
+    /// @notice Return the metadata URI for the token id `tokenId` 
     function uri(uint256 tokenId) override public pure returns (string memory) {
         return (
             string(abi.encodePacked(
@@ -35,7 +35,7 @@ contract Badges is ERC1155, AccessControl {
         _setupRole(MINTER_ROLE, minter);
     }
 
-    /// @notice Mint `amount` tokens of the given `tokenId` to `recipient`.
+    /// @notice Mint `amount` tokens of the token id `tokenId` to `recipient`.
     function mint(address recipient, uint256 tokenId, uint256 amount, bytes memory data) 
         external 
         onlyRole(MINTER_ROLE) 
